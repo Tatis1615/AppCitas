@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 
 export default function EditarPaciente({ route, navigation }) {
   const { paciente } = route.params;
@@ -10,59 +10,84 @@ export default function EditarPaciente({ route, navigation }) {
   const [direccion, setDireccion] = useState(paciente.direccion);
   const [email, setEmail] = useState(paciente.email);
 
-    return (
-        <View style={{ flex: 1, padding: 20 }}>
-        <Text style={{ fontSize: 22 }}>Editar Paciente</Text>
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Editar Paciente</Text>
 
-        <Text>Nombre:</Text>
-        <TextInput
-            value={nombre}
-            onChangeText={setNombre}
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-        />
+      {/* Campos de formulario */}
+      {[
+        { label: "Nombre", value: nombre, setter: setNombre },
+        { label: "Edad", value: edad, setter: setEdad, keyboardType: "numeric" },
+        { label: "Documento", value: documento, setter: setDocumento },
+        { label: "Teléfono", value: telefono, setter: setTelefono },
+        { label: "Dirección", value: direccion, setter: setDireccion },
+        { label: "Email", value: email, setter: setEmail },
+      ].map((campo, index) => (
+        <View key={index} style={styles.inputGroup}>
+          <Text style={styles.label}>{campo.label}:</Text>
+          <TextInput
+            value={campo.value}
+            onChangeText={campo.setter}
+            keyboardType={campo.keyboardType || "default"}
+            style={styles.input}
+          />
+        </View>
+      ))}
 
-        <Text>Edad:</Text>
-        <TextInput
-            value={edad}
-            onChangeText={setEdad}
-            keyboardType="numeric"
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-        />
-        <Text>Documento:</Text>
-        <TextInput
-            value={paciente.documento}
-            onChangeText={setDocumento}
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-        />
-        <Text>Telefono:</Text>
-        <TextInput
-            value={paciente.telefono}
-            onChangeText={setTelefono}
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-        />
-        <Text>Direccion:</Text> 
-        <TextInput
-            value={paciente.direccion}
-            onChangeText={setDireccion}
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-        />
-        <Text>Email:</Text>
-        <TextInput
-            value={paciente.email}
-            onChangeText={setEmail}
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-        />
-
-
-      <Button
-        title="Guardar"
+      {/* Botón Guardar */}
+      <TouchableOpacity
+        style={styles.button}
         onPress={() => {
-          // Aquí podrías guardar cambios en una BD, por ahora simulamos:
-          alert(`Paciente actualizado: ${nombre}, Edad: ${edad}, Documento: ${documento}, Telefono: ${telefono}, Direccion: ${direccion}, 
-            Email: ${email}`);
+          alert(
+            `Paciente actualizado:\n\nNombre: ${nombre}\nEdad: ${edad}\nDocumento: ${documento}\nTeléfono: ${telefono}\nDirección: ${direccion}\nEmail: ${email}`
+          );
           navigation.goBack();
         }}
-      />
-    </View>
+      >
+        <Text style={styles.buttonText}>Guardar</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff0f5", // fondo rosadito
+  },
+  title: {
+    fontSize: 22,
+    marginBottom: 20,
+    fontWeight: "bold",
+    color: "#cc3366",
+    textAlign: "center",
+  },
+  inputGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: "#333",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: "#ffe6f0",
+  },
+  button: {
+    backgroundColor: "pink",
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

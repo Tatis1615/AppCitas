@@ -1,19 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 
-export default function CrearCita({ navigation }) {
-  const [paciente_id, setPacienteId] = useState("");
-  const [medico_id, setMedicoId] = useState("");
-  const [consultorio_id, setConsultorioId] = useState("");
-  const [fecha_hora, setFecha_hora] = useState("");
-  const [estado, setEstado] = useState("");
-  const [motivo, setMotivo] = useState("");
-
+export default function CrearConsultrio({ navigation }) {
+  const [numero, setNumero] = useState("");
+  const [ubicacion, setUbicacion] = useState("");
 
   const handleCrear = () => {
-    if (paciente_id && medico_id && consultorio_id && fecha_hora && estado && motivo) {
-      alert("✅ Cita creada (simulado)");
-      navigation.navigate("ListarCitas");
+    if (nombre && edad && documento && telefono && direccion && email) {
+      alert("✅ Conusltorio creada (simulado)");
+      navigation.navigate("ListarConsultorios");
     } else {
       alert("Por favor completa todos los campos");
     }
@@ -21,51 +16,24 @@ export default function CrearCita({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Agendar Nueva Cita</Text>
+      <Text style={styles.title}>Agendar Nuevo Consultorio</Text>
         <TextInput
             style={styles.input}
-            placeholder="ID del Paciente"
-            value={paciente_id}
-            onChangeText={setPacienteId}
-            keyboardType="numeric"
+            placeholder="Numero del consultorio"
+            value={numero}
+            onChangeText={setNumero}
         />
         <TextInput
             style={styles.input}
-            placeholder="ID del Médico"
-            value={medico_id}
-            onChangeText={setMedicoId}
-            keyboardType="numeric"
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="ID del Consultorio"
-            value={consultorio_id}
-            onChangeText={setConsultorioId}
-            keyboardType="numeric"
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="Fecha y Hora (YYYY-MM-DD HH:MM)"
-            value={fecha_hora}
-            onChangeText={setFecha_hora}
-        />
-        <TextInput  
-            style={styles.input}
-            placeholder="Estado (e.g., agendada, completada, cancelada)"
-            value={estado}
-            onChangeText={setEstado}
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="Motivo de la cita"
-            value={motivo}
-            onChangeText={setMotivo}
+            placeholder="Ubicación"
+            value={ubicacion}
+            onChangeText={setUbicacion}
         />
       {/* Botón Crear */}
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
         <Text style={styles.buttonText}>Crear Paciente</Text>
       </TouchableOpacity>
-
+      
       {/* Botón Volver */}
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
@@ -121,3 +89,4 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
+

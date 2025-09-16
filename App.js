@@ -9,23 +9,27 @@ import Registro from "./Screen/Auth/registro";
 import Inicio from "./Screen/Inicio/inicio";
 
 import ListarCitas from "./Screen/Citas/listarCitas";
-// import CrearCita from "./Screen/Citas/crearCita";
+import CrearCita from "./Screen/Citas/crearCita";
 import EditarCita from "./Screen/Citas/editarCita";
 import DetalleCita from "./Screen/Citas/detalleCita";
 
 import ListarPacientes from "./Screen/Pacientes/listarPaciente";
+import CrearPaciente from "./Screen/Pacientes/crearPaciente";
 import DetallePaciente from "./Screen/Pacientes/detallePaciente";
 import EditarPaciente from "./Screen/Pacientes/editarPaciente";
 
 import ListarMedicos from "./Screen/Medicos/listarMedico";
+import CrearMedico from "./Screen/Medicos/crearMedico";
 import DetalleMedico from "./Screen/Medicos/detalleMedico";
 import EditarMedico from "./Screen/Medicos/editarMedico";
 
 import ListarConsultorios from "./Screen/Consultorios/listarConsultorio";
+import CrearConsultorio from "./Screen/Consultorios/crearConsultorio";
 import DetalleConsultorio from "./Screen/Consultorios/detalleConsultorio";
 import EditarConsultorio from "./Screen/Consultorios/editarConsultorio";
 
 import ListarEspecialidades from "./Screen/Especialidades/listarEspecialidad";
+import CrearEspecialidad from "./Screen/Especialidades/crearEspecialidad";
 import DetalleEspecialidad from "./Screen/Especialidades/detalleEspecialidad";
 import EditarEspecialidad from "./Screen/Especialidades/editarEspecialidad";
 
@@ -50,18 +54,16 @@ export default function App() {
           component={Inicio}
           options={{ title: "Menú Principal" }}
         />
-
-
         <Stack.Screen
           name="ListarCitas"
           component={ListarCitas}
           options={{ title: "Citas Agendadas" }}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="CrearCita"
           component={CrearCita}
           options={{ title: "Agendar Cita" }}
-        /> */}
+        />
         <Stack.Screen
           name="EditarCita"
           component={EditarCita}
@@ -72,12 +74,15 @@ export default function App() {
           component={DetalleCita}
           options={{ title: "Detalle de la Cita" }}
         />
-
-
         <Stack.Screen
           name="ListarPacientes"
           component={ListarPacientes}
           options={{ title: "Listado de Pacientes" }}
+        />
+        <Stack.Screen
+          name="CrearPaciente"
+          component={CrearPaciente}
+          options={{ title: "Crear Paciente" }}
         />
         <Stack.Screen
           name="DetallePaciente"
@@ -89,12 +94,15 @@ export default function App() {
           component={EditarPaciente}
           options={{ title: "Editar Paciente" }}
         />
-
-
         <Stack.Screen
-          name="ListarMedicos"
+          name="Medicos"
           component={ListarMedicos}
           options={{ title: "Listado de Médicos" }}
+        />
+        <Stack.Screen
+          name="CrearMedico"
+          component={CrearMedico}
+          options={{ title: "Crear Médico" }}
         />
         <Stack.Screen
           name="DetalleMedico"
@@ -106,12 +114,15 @@ export default function App() {
           component={EditarMedico}
           options={{ title: "Editar Médico" }}
         />
-
-
         <Stack.Screen
-          name="  ListarConsultorios"
+          name="Consultorios"
           component={ListarConsultorios}
           options={{ title: "Listado de Consultorios" }}
+        />
+        <Stack.Screen
+          name="CrearConsultorio"
+          component={CrearConsultorio}
+          options={{ title: "Crear Consultorio" }}
         />
         <Stack.Screen
           name="DetalleConsultorio"
@@ -123,12 +134,15 @@ export default function App() {
           component={EditarConsultorio}
           options={{ title: "Editar Consultorio" }}
         />
-
-
         <Stack.Screen
-          name="ListarEspecialidades"
+          name="Especialidades"
           component={ListarEspecialidades}
           options={{ title: "Listado de Especialidades" }}
+        />
+        <Stack.Screen
+          name="CrearEspecialidad"
+          component={CrearEspecialidad}
+          options={{ title: "Crear Especialidad" }}
         />
         <Stack.Screen
           name="DetalleEspecialidad"
@@ -140,8 +154,6 @@ export default function App() {
           component={EditarEspecialidad}
           options={{ title: "Editar Especialidad" }}
         />  
-
-
       </Stack.Navigator>
     </NavigationContainer>
   );
