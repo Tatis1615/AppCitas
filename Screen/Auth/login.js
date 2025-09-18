@@ -1,21 +1,41 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    if (email && password) {
-      navigation.navigate("Inicio");
-    } else {
+  const handleLogin = async () => {
+    if (!email || !password) {
       alert("Por favor ingresa los datos");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://10.2.233.141:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.access_token) {
+        // ✅ Guardar token en AsyncStorage
+        await AsyncStorage.setItem("token", data.access_token);
+
+        alert(data.message); // Ej: "Hi Paula"
+        navigation.navigate("Inicio"); // Redirige al inicio
+      } else {
+        alert(data.message || "Error en el login");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo conectar con el servidor");
     }
   };
 

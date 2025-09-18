@@ -1,23 +1,46 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 export default function Registro({ navigation }) {
-  const [nombre, setNombre] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState(""); // Rol por defecto
 
-  const handleRegister = () => {
-    if (nombre && email && password) {
-      alert("💖 Usuario registrado (simulado) 💖");
-      navigation.navigate("Login");
-    } else {
-      alert("Por favor completa todos los campos");
+  const handleRegister = async () => {
+    if (!name || !email || !password || !role) {
+      Alert.alert("Error", "Por favor completa todos los campos");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://10.2.233.141:8000/api/registrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Éxito", "Usuario registrado correctamente 💖");
+        navigation.navigate("Login");
+      } else {
+        console.log("Errores:", data);
+        Alert.alert("Error", "No se pudo registrar el usuario");
+      }
+    } catch (error) {
+      console.error("Error en el registro:", error);
+      Alert.alert("Error", "Hubo un problema con la conexión al servidor");
     }
   };
 
@@ -29,8 +52,8 @@ export default function Registro({ navigation }) {
         style={styles.input}
         placeholder="Nombre"
         placeholderTextColor="#cc6699"
-        value={nombre}
-        onChangeText={setNombre}
+        value={name}
+        onChangeText={setName}
       />
       <TextInput
         style={styles.input}
@@ -46,6 +69,13 @@ export default function Registro({ navigation }) {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Rol"
+        placeholderTextColor="#cc6699"
+        value={role}
+        onChangeText={setRole}
       />
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
