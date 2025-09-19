@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Para usar íconos bonitos
-import AsyncStorage from "@react-native-async-storage/async-storage"; // ✅ Importar librería
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config"; // Import para url 
 
 export default function Inicio({ navigation }) {
 
@@ -11,14 +12,14 @@ const [userName, setUserName] = useState("");
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = await AsyncStorage.getItem("token"); // 🔑 recuperar token
+        const token = await AsyncStorage.getItem("token"); 
 
         if (!token) {
           console.log("No hay token guardado");
           return;
         }
 
-        const response = await fetch("http://10.2.233.141:8000/api/me", {
+        const response = await fetch(`${API_BASE_URL}/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
@@ -40,31 +41,7 @@ const [userName, setUserName] = useState("");
     fetchUser();
   }, []);
 
-    const handleLogout = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token"); // el token que guardaste en el login
-      const response = await fetch("http://10.2.233.141:8000/api/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        await AsyncStorage.removeItem("token"); // borra el token local
-        Alert.alert("Éxito", data.message);
-        navigation.replace("Login"); // redirige al login
-      } else {
-        Alert.alert("Error", data.message || "No se pudo cerrar sesión");
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Ocurrió un problema al cerrar sesión");
-    }
-  };
+    
 
 
 
@@ -77,7 +54,7 @@ const [userName, setUserName] = useState("");
         {/* Recuadro 1 */}
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("ListarCitas")}
+          onPress={() => navigation.navigate("Citas", { screen: "ListarCitas" })}
         >
           <Ionicons name="calendar-outline" size={40} color="#cc3366" />
           <Text style={styles.cardTitle}>Citas</Text>
@@ -87,7 +64,7 @@ const [userName, setUserName] = useState("");
         {/* Recuadro 2 */}
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("ListarPacientes")}
+          onPress={() => navigation.navigate("Pacientes", { screen: "ListarPacientes" })}
         >
           <Ionicons name="person-add-outline" size={40} color="#cc3366" />
           <Text style={styles.cardTitle}>Pacientes</Text>
@@ -97,7 +74,7 @@ const [userName, setUserName] = useState("");
         {/* Recuadro 3 */}
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Medicos")}
+          onPress={() => navigation.navigate("Medicos", { screen: "ListarMedicos" })}
         >
           <Ionicons name="medkit-outline" size={40} color="#cc3366" />
           <Text style={styles.cardTitle}>Médicos</Text>
@@ -107,7 +84,7 @@ const [userName, setUserName] = useState("");
         {/* Recuadro 4 */}
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Consultorios")}
+          onPress={() => navigation.navigate("Consultorios", { screen: "ListarConsultorios" })}
         >
           <Ionicons name="business-outline" size={40} color="#cc3366" />
           <Text style={styles.cardTitle}>Consultorios</Text>
@@ -117,18 +94,13 @@ const [userName, setUserName] = useState("");
         {/* Recuadro 4 */}
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Especialidades")}
+          onPress={() => navigation.navigate("Especialidades", { screen: "ListarEspecialidades" })}
         >
           <Ionicons name="business-outline" size={40} color="#cc3366" />
           <Text style={styles.cardTitle}>Especialidades</Text>
           <Text style={styles.cardDesc}>Gestión de especialidades</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Botón Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Cerrar Sesión</Text>
-      </TouchableOpacity>
 
     </View>
   );
