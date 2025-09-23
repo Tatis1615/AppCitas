@@ -1,20 +1,68 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function DetalleConsultorio({ route, navigation }) {
-  const { consultorio } = route.params;
+  const { id } = route.params;
+  const [consultorio, setConsultorio] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchConsultorio = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/consultorios/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("No se pudo cargar el consultorio");
+
+        const data = await response.json();
+        setConsultorio(data);
+      } catch (error) {
+        console.error(error);
+        alert("❌ No se pudo cargar el consultorio");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConsultorio();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando consultorio...</Text>
+      </View>
+    );
+  }
+
+  if (!consultorio) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red" }}>⚠️ No se encontró información del consultorio</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Detalles del consultorio</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Numero:</Text>
+        <Text style={styles.label}>Número:</Text>
         <Text style={styles.value}>{consultorio.numero}</Text>
 
-        <Text style={styles.label}>Ubicacion:</Text>
+        <Text style={styles.label}>Ubicación:</Text>
         <Text style={styles.value}>{consultorio.ubicacion}</Text>
-
       </View>
 
       {/* Botón Editar */}
@@ -40,7 +88,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff0f5", // Fondo pastel rosado
+    backgroundColor: "#fff0f5",
   },
   title: {
     fontSize: 22,
@@ -83,4 +131,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-

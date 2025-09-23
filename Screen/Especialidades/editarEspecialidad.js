@@ -5,26 +5,57 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function EditarEspecialidad({ route, navigation }) {
   const { especialidad } = route.params;
-  const [nombre, setNombre] = useState(especialidad.nombre);
+  const [nombre_e, setNombre] = useState(especialidad.nombre_e);
 
-  const handleGuardar = () => {
-    alert(`Especialidad actualizada: ${nombre}`);
-    navigation.goBack();
+  const handleGuardar = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/actualizarEspecialidad/${especialidad.id}`,{
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ nombre_e }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+       alert("✅ Consultorio actualizado con éxito");
+        navigation.goBack();
+      } else {
+        console.log("⚠️ Backend respondió con error:", data);
+        alert("❌ Error al actualizar el consultorio");
+      }
+    } catch (error) {
+      console.error("⚡ Error de red:", error);
+      alert("⚠️ Error de conexión con el servidor");
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+
       <Text style={styles.title}>Editar Especialidad</Text>
 
       <View style={styles.card}>
         <Text style={styles.label}>Nombre de la Especialidad:</Text>
         <TextInput
           style={styles.input}
-          value={nombre}
+          value={nombre_e}
           onChangeText={setNombre}
           placeholder="Ej: Cardiología"
         />
@@ -42,7 +73,7 @@ export default function EditarEspecialidad({ route, navigation }) {
       >
         <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 

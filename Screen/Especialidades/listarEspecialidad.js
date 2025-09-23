@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config"; // Import de tu URL base
 
 export default function ListarEspecialidades({ navigation }) {
@@ -9,11 +10,25 @@ export default function ListarEspecialidades({ navigation }) {
   useEffect(() => {
     const fetchEspecialidades = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/especialidades`);
+        const token = await AsyncStorage.getItem("token");
+
+        const response = await fetch(`${API_BASE_URL}/listarEspecialidades`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+      });
         const data = await response.json();
-        setEspecialidades(data);
+
+        if (response.ok) {
+          setEspecialidades(data);
+        } else {
+          console.log("Error al obtener especialidades:", data);
+        }
       } catch (error) {
-        console.error("Error al obtener especialidades:", error);
+        console.error("Error en fetchEspecialidades:", error);
       } finally {
         setLoading(false);
       }
@@ -40,12 +55,17 @@ export default function ListarEspecialidades({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetalleEspecialidad", { especialidad: item })}
             style={styles.card}
+            onPress={() => navigation.navigate("DetalleEspecialidad", { id: item.id })}
           >
-            <Text style={styles.cardTitle}>{item.nombre}</Text>
+            <Text style={styles.cardTitle}>{item.nombre_e}</Text>
           </TouchableOpacity>
         )}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
+            No tienes citas registradas.
+          </Text>
+        }
       />
 
       {/* Botón Crear Especialidad */}
@@ -84,6 +104,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 25,
     alignItems: "center",
+    marginBottom: 20,
     marginTop: 15,
   },
   buttonText: {
@@ -109,4 +130,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+  cardSubtitle: {
+    color: "#555",
+    marginTop: 3,
+  },
 });
+

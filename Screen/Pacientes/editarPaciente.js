@@ -1,50 +1,121 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function EditarPaciente({ route, navigation }) {
   const { paciente } = route.params;
   const [nombre, setNombre] = useState(paciente.nombre);
-  const [edad, setEdad] = useState(String(paciente.edad));
+  const [ apellido, setApellido ] = useState(paciente.apellido);
   const [documento, setDocumento] = useState(paciente.documento);
   const [telefono, setTelefono] = useState(paciente.telefono);
-  const [direccion, setDireccion] = useState(paciente.direccion);
   const [email, setEmail] = useState(paciente.email);
+  const [fecha_nacimiento, setFecha_nacimiento] = useState(paciente.fecha_nacimiento);
+  const [direccion, setDireccion] = useState(paciente.direccion);
+
+
+const handleGuardar = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await fetch(`${API_BASE_URL}/actualizarPaciente/${paciente.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ nombre, apellido, documento, telefono, email, fecha_nacimiento, direccion }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ Paciente actualizado con éxito");
+      navigation.goBack();
+    } else {
+      console.log("⚠️ Backend respondió con error:", data);
+      alert("❌ Error al actualizar el paciente");
+    }
+  } catch (error) {
+    console.error("⚡ Error de red:", error);
+    alert("⚠️ Error de conexión con el servidor");
+  }
+};
+
+
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Editar Paciente</Text>
 
-      {/* Campos de formulario */}
-      {[
-        { label: "Nombre", value: nombre, setter: setNombre },
-        { label: "Edad", value: edad, setter: setEdad, keyboardType: "numeric" },
-        { label: "Documento", value: documento, setter: setDocumento },
-        { label: "Teléfono", value: telefono, setter: setTelefono },
-        { label: "Dirección", value: direccion, setter: setDireccion },
-        { label: "Email", value: email, setter: setEmail },
-      ].map((campo, index) => (
-        <View key={index} style={styles.inputGroup}>
-          <Text style={styles.label}>{campo.label}:</Text>
-          <TextInput
-            value={campo.value}
-            onChangeText={campo.setter}
-            keyboardType={campo.keyboardType || "default"}
-            style={styles.input}
-          />
-        </View>
-      ))}
+      <View style={styles.card}>
+        <Text style={styles.label}>Nombre:</Text>
+        <TextInput
+          value={nombre}
+          onChangeText={setNombre}
+          style={styles.input}
+          placeholder="Nombre"
+        />
+
+        <Text style={styles.label}>Apellido:</Text>
+        <TextInput
+          value={apellido}
+          onChangeText={setApellido}
+          style={styles.input}
+          placeholder="Apellido"
+        />
+        <Text style={styles.label}>Documento:</Text>
+        <TextInput
+          value={documento}
+          onChangeText={setDocumento}
+          style={styles.input}
+          placeholder="Documetno"
+        />
+        <Text style={styles.label}>Telefono:</Text>
+        <TextInput
+          value={telefono}
+          onChangeText={setTelefono}
+          style={styles.input}
+          placeholder="Telefono"
+        />
+        <Text style={styles.label}>Email:</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+          placeholder="Email"
+        />
+        <Text style={styles.label}>Fecha de nacimiento:</Text>
+        <TextInput
+          value={fecha_nacimiento}
+          onChangeText={setFecha_nacimiento}
+          style={styles.input}
+          placeholder="Fecha nacimiento"
+        />
+        <Text style={styles.label}>Dirección:</Text>
+        <TextInput
+          value={direccion}
+          onChangeText={setDireccion}
+          style={styles.input}
+          placeholder="Direccion"
+        />
+        
+      </View>
 
       {/* Botón Guardar */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          alert(
-            `Paciente actualizado:\n\nNombre: ${nombre}\nEdad: ${edad}\nDocumento: ${documento}\nTeléfono: ${telefono}\nDirección: ${direccion}\nEmail: ${email}`
-          );
-          navigation.goBack();
-        }}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleGuardar}>
         <Text style={styles.buttonText}>Guardar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.secondaryButton]}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
     </ScrollView>
   );

@@ -25,7 +25,7 @@ export default function ListarPacientes({ navigation }) {
         const data = await response.json();
 
         if (response.ok) {
-          setPacientes(data); // 👈 el backend debe devolver un array de citas
+          setPacientes(data); 
         } else {
           console.log("Error al obtener citas:", data);
         }
@@ -57,14 +57,14 @@ export default function ListarPacientes({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetallePaciente", { paciente: item })}
             style={styles.card}
+            onPress={() => navigation.navigate("DetallePaciente", { id: item.id })}
           >
-            <Image source={{ uri: item.foto }} style={styles.avatar} />
+            <Image source={{ uri: "https://i.pinimg.com/1200x/55/f4/4f/55f44f72c699b296c43ca80743dc3173.jpg" }} style={styles.avatar} />
             <View style={styles.info}>
               <Text style={styles.cardTitle}>{item.nombre}</Text>
-              <Text style={styles.cardSubtitle}>Edad: {item.edad} años</Text>
-              <Text style={styles.cardSubtitle}>📞 {item.telefono}</Text>
+              <Text style={styles.cardSubtitle}>Documento: {item.documento}</Text>
+              <Text style={styles.cardSubtitle}>Telefono: {item.telefono}</Text>
             </View>
           </TouchableOpacity>
         )}

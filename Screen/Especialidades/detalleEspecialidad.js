@@ -1,16 +1,64 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function DetalleEspecialidad({ route, navigation }) {
-  const { especialidad } = route.params;
+  const { id } = route.params;
+  const [ especialidad, setEspecialidad ] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    const fetchEspecialidad = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/especialidades/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("No se pudo cargar la especialidad");
+
+        const data = await response.json();
+        setEspecialidad(data); 
+      } catch (error) {
+        console.error(error);
+        alert("❌ No se pudo cargar la especialidad");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEspecialidad();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando especialidad...</Text>
+      </View>
+    );
+  }
+  if (!especialidad) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red" }}>⚠️ No se encontró información del consultorio</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Detalles del Especialidad</Text>
       <View style={styles.card}>
         <Text style={styles.label}>Nombre:</Text>
-        <Text style={styles.value}>{especialidad.nombre}</Text>
-
+        <Text style={styles.value}>{especialidad.nombre_e}</Text>
       </View>
 
       {/* Botón Editar */}

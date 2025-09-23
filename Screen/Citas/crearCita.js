@@ -12,7 +12,7 @@ export default function CrearCita({ navigation }) {
 
   const handleCrear = async () => {
     if (!medico_id || !consultorio_id || !fecha_hora || !estado || !motivo) {
-      Alert.alert("Error", "Por favor completa todos los campos");
+      alert("Error", "Por favor completa todos los campos");
       return;
     }
 
@@ -38,15 +38,15 @@ export default function CrearCita({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Éxito", "✅ Cita creada correctamente");
+        alert("Éxito", "✅ Cita creada correctamente");
         navigation.navigate("ListarCitas");
       } else {
         console.log("Errores:", data);
-        Alert.alert("Error", data.message || "No se pudo crear la cita");
+        alert("Error", data.message || "No se pudo crear la cita");
       }
     } catch (error) {
       console.error("Error en crear cita:", error);
-      Alert.alert("Error", "Hubo un problema al conectar con el servidor");
+      alert("Error", "Hubo un problema al conectar con el servidor");
     }
   };
 

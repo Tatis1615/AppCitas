@@ -24,7 +24,7 @@ export default function ListarConsultorios({ navigation }) {
         const data = await response.json();
 
         if (response.ok) {
-          setConsultorios(data); // 👈 el backend debe devolver un array de citas
+          setConsultorios(data);
         } else {
           console.log("Error al obtener citas:", data);
         }
@@ -56,8 +56,8 @@ export default function ListarConsultorios({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetalleConsultorio", { consultorio: item })}
             style={styles.card}
+            onPress={() => navigation.navigate("DetalleConsultorio", { id: item.id })}
           >
             <Text style={styles.cardTitle}>Consultorio N° {item.numero}</Text>
             <Text style={styles.cardSubtitle}>Ubicación: {item.ubicacion}</Text>

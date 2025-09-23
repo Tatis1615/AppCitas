@@ -19,7 +19,7 @@ export default function Registro({ navigation }) {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !role) {
-      Alert.alert("Error", "Por favor completa todos los campos");
+      alert("Error", "Por favor completa todos los campos");
       return;
     }
 
@@ -41,15 +41,15 @@ export default function Registro({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Éxito", "Usuario registrado correctamente 💖");
+        alert("Éxito", "Usuario registrado correctamente 💖");
         navigation.navigate("Login");
       } else {
         console.log("Errores:", data);
-        Alert.alert("Error", "No se pudo registrar el usuario");
+        alert("Error", "No se pudo registrar el usuario");
       }
     } catch (error) {
       console.error("Error en el registro:", error);
-      Alert.alert("Error", "Hubo un problema con la conexión al servidor");
+      alert("Error", "Hubo un problema con la conexión al servidor");
     }
   };
 

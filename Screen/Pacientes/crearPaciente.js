@@ -1,20 +1,49 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function CrearPaciente({ navigation }) {
   const [nombre, setNombre] = useState("");
-  const [edad, setEdad] = useState("");
+  const [apellido, setApellido] = useState("");
   const [documento, setDocumento] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [direccion, setDireccion] = useState("");
   const [email, setEmail] = useState("");
+  const [fecha_nacimiento, setFecha_nacimiento] = useState("");
+  const [direccion, setDireccion] = useState("");
+  
 
-  const handleCrear = () => {
-    if (nombre && edad && documento && telefono && direccion && email) {
-      alert("✅ Paciente creado (simulado)");
-      navigation.navigate("ListarPacientes");
-    } else {
+  const handleCrear = async () => {
+    if (!nombre || !apellido || !documento || !telefono || !email || !fecha_nacimiento || !direccion) {
       alert("⚠️ Por favor completa todos los campos");
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(`${API_BASE_URL}/crearPaciente`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ nombre, apellido, documento, telefono, email, fecha_nacimiento, direccion }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Éxito", "✅ Paciente creada correctamente");
+        navigation.navigate("ListarPacientes");
+      } else {
+        console.log("Errores:", data);
+        alert("Error", data.message || "No se pudo crear la cita");
+      }
+    } catch (error) {
+      console.error("Error en crear cita:", error);
+      alert("Error", "Hubo un problema al conectar con el servidor");
     }
   };
 
@@ -24,16 +53,15 @@ export default function CrearPaciente({ navigation }) {
 
       <TextInput
         style={styles.input}
-        placeholder="Nombre completo"
+        placeholder="Nombre"
         value={nombre}
         onChangeText={setNombre}
       />
       <TextInput
         style={styles.input}
-        placeholder="Edad"
-        value={edad}
-        onChangeText={setEdad}
-        keyboardType="numeric"
+        placeholder="Apellido"
+        value={apellido}
+        onChangeText={setApellido}
       />
       <TextInput
         style={styles.input}
@@ -49,17 +77,24 @@ export default function CrearPaciente({ navigation }) {
       />
       <TextInput
         style={styles.input}
-        placeholder="Dirección"
-        value={direccion}
-        onChangeText={setDireccion}
-      />
-      <TextInput
-        style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Fecha de nacimiento"
+        value={fecha_nacimiento}
+        onChangeText={setFecha_nacimiento}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Dirección"
+        value={direccion}
+        onChangeText={setDireccion}
+      />
+      
 
       {/* Botón Crear */}
       <TouchableOpacity style={styles.button} onPress={handleCrear}>

@@ -1,16 +1,44 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function CrearEspecialidad({ navigation }) {
-  const [nombre, setNombre] = useState("");
+  const [nombre_e, setNombre] = useState("");
 
-  const handleCrear = () => {
-    if (nombre) {
-      alert("✅ Especialidad creada (simulado)");
-      navigation.navigate("ListarEspecialidades");
-    } else {
+  const handleCrear = async () => {
+    if (!nombre_e) {
       alert("Por favor completa todos los campos");
+      return;
+    } 
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(`${API_BASE_URL}/crearEspecialidad`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ nombre_e }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Éxito", "✅ Especialidad creada correctamente");
+        navigation.navigate("ListarEspecialidades");
+      } else {
+        console.log("Errores:", data);
+        alert("Error", data.message || "No se pudo crear la especialidad");
+      }
+    } catch (error) {
+      console.error("Error en crear especialidad:", error);
+      alert("Error", "Hubo un problema al conectar con el servidor");
     }
+
   };
 
   return (
@@ -19,7 +47,7 @@ export default function CrearEspecialidad({ navigation }) {
         <TextInput
             style={styles.input}
             placeholder="Nombre de la especialidad"
-            value={nombre}
+            value={nombre_e}
             onChangeText={setNombre}
         />
       {/* Botón Crear */}

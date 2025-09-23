@@ -1,8 +1,58 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function DetallePaciente({ route, navigation }) {
-  const { paciente } = route.params;
+  const { id } = route.params;
+  const [paciente, setPaciente] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPaciente = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/pacientes/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("No se pudo cargar el paciente");
+
+        const data = await response.json();
+        setPaciente(data); 
+      } catch (error) {
+        console.error(error);
+        alert("❌ No se pudo cargar el paciente");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPaciente();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando paciente...</Text>
+      </View>
+    );
+  }
+
+  if (!paciente) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red" }}>⚠️ No se encontró información</Text>
+      </View>
+    );
+  }
+
 
   return (
     <View style={styles.container}>
@@ -12,8 +62,8 @@ export default function DetallePaciente({ route, navigation }) {
         <Text style={styles.label}>Nombre:</Text>
         <Text style={styles.value}>{paciente.nombre}</Text>
 
-        <Text style={styles.label}>Edad:</Text>
-        <Text style={styles.value}>{paciente.edad}</Text>
+        <Text style={styles.label}>Apellido:</Text>
+        <Text style={styles.value}>{paciente.apellido}</Text>
 
         <Text style={styles.label}>Documento:</Text>
         <Text style={styles.value}>{paciente.documento}</Text>
@@ -21,11 +71,15 @@ export default function DetallePaciente({ route, navigation }) {
         <Text style={styles.label}>Teléfono:</Text>
         <Text style={styles.value}>{paciente.telefono}</Text>
 
+        <Text style={styles.label}>Email:</Text>
+        <Text style={styles.value}>{paciente.email}</Text>
+
+        <Text style={styles.label}>Fecha de nacimiento:</Text>
+        <Text style={styles.value}>{paciente.fecha_nacimiento}</Text>
+
         <Text style={styles.label}>Dirección:</Text>
         <Text style={styles.value}>{paciente.direccion}</Text>
 
-        <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>{paciente.email}</Text>
       </View>
 
       {/* Botón Editar */}

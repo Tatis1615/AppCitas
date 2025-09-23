@@ -9,7 +9,7 @@ export default function CrearConsultorio({ navigation }) {
 
   const handleCrear = async () => {
     if (!numero || !ubicacion) {
-      Alet.alert("Por favor completa todos los campos");
+      alert("Por favor completa todos los campos");
       return;
     }
 
@@ -29,15 +29,15 @@ export default function CrearConsultorio({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Éxito", "✅ Consultorio creada correctamente");
+        alert("Éxito", "✅ Consultorio creada correctamente");
         navigation.navigate("ListarConsultorios");
       } else {
         console.log("Errores:", data);
-        Alert.alert("Error", data.message || "No se pudo crear la cita");
+        alert("Error", data.message || "No se pudo crear la cita");
       }
     } catch (error) {
       console.error("Error en crear cita:", error);
-      Alert.alert("Error", "Hubo un problema al conectar con el servidor");
+      alert("Error", "Hubo un problema al conectar con el servidor");
     }
   };
 
