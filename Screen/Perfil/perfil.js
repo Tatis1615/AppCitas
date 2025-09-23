@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, Scr
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import API_BASE_URL from "../../Src/Config";
+import { Image } from "react-native"; // 👈 agrega esta importación
 
 export default function Perfil({ navigation }) {
   const [user, setUser] = useState(null);
@@ -67,7 +68,7 @@ export default function Perfil({ navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6f42c1" />
+        <ActivityIndicator size="large" color="#f7b2c4" />
         <Text style={styles.loadingText}>Cargando tu perfil...</Text>
       </View>
     );
@@ -76,40 +77,41 @@ export default function Perfil({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       {user ? (
-        <>
-          {/* Encabezado tipo banner */}
+        <View style={styles.panel}>
+          {/* Encabezado en el panel */}
           <View style={styles.header}>
-            <Ionicons name="person-circle" size={100} color="#6c757d" />
+            <Image
+              source={{
+                uri: "https://i.pinimg.com/1200x/55/f4/4f/55f44f72c699b296c43ca80743dc3173.jpg" 
+              }}
+              style={styles.profileImage}
+            />
             <Text style={styles.name}>{user.name}</Text>
             <Text style={styles.role}>{user.role}</Text>
           </View>
 
-          {/* Caja estilo card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Información del Usuario</Text>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Nombre</Text>
-              <Text style={styles.value}>{user.name}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{user.email}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Rol</Text>
-              <Text style={styles.value}>{user.role}</Text>
-            </View>
+          {/* Secciones dentro del panel */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Nombre</Text>
+            <Text style={styles.value}>{user.name}</Text>
           </View>
 
-          {/* Botón estilo Bootstrap */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{user.email}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Rol</Text>
+            <Text style={styles.value}>{user.role}</Text>
+          </View>
+
+          {/* Botón cerrar sesión */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color="#fff" />
             <Text style={styles.logoutText}>Cerrar Sesión</Text>
           </TouchableOpacity>
-        </>
+        </View>
       ) : (
         <Text style={styles.errorText}>No se pudieron cargar los datos.</Text>
       )}
@@ -120,76 +122,69 @@ export default function Perfil({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa", // gris claro tipo bootstrap
+    backgroundColor: "#ffeef6", // Fondo rosa pastel muy suave
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffeef6",
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#6c757d",
+    color: "#e38ea8",
+  },
+  panel: {
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 25,
+    padding: 25,
+    shadowColor: "#e5a4c4",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
   header: {
-    backgroundColor: "#c4bcd4ff",
-    paddingVertical: 40,
     alignItems: "center",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginBottom: 20,
+    marginBottom: 25,
   },
   name: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#fff",
-    marginTop: 10,
+    color: "#e38ea8",
+    marginTop: 8,
   },
   role: {
-    fontSize: 16,
-    color: "#e0d7f7",
+    fontSize: 15,
+    color: "#f2a9c9",
   },
-  card: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-    marginBottom: 30,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+  section: {
+    backgroundColor: "#fff6fa",
+    padding: 15,
+    borderRadius: 15,
     marginBottom: 15,
-    color: "#343a40",
-    textAlign: "center",
-  },
-  infoRow: {
-    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#fbd6e3",
   },
   label: {
     fontSize: 14,
-    color: "#6c757d",
+    color: "#c77d94",
+    marginBottom: 4,
   },
   value: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#212529",
+    color: "#444",
   },
   logoutButton: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#7e6ea3ff", // rojo bootstrap
-    marginHorizontal: 20,
+    backgroundColor: "#f7b2c4", // rosa pastel más suave
     paddingVertical: 14,
-    borderRadius: 18,
-    marginBottom: 40,
+    borderRadius: 20,
+    marginTop: 20,
   },
   logoutText: {
     color: "#fff",
@@ -200,7 +195,17 @@ const styles = StyleSheet.create({
   errorText: {
     textAlign: "center",
     marginTop: 20,
-    color: "#904f4fff",
+    color: "#d87093",
     fontSize: 16,
   },
+  profileImage: {
+  width: 110,
+  height: 110,
+  borderRadius: 55, // círculo
+  borderWidth: 3,
+  borderColor: "#f7b2c4",
+  marginBottom: 12,
+  backgroundColor: "#ffeef6",
+},
+
 });

@@ -19,8 +19,8 @@ export default function Tabs() {
           else if (route.name === "Perfil") iconName = "person-outline";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#63718aff",
-        tabBarInactiveTintColor: "gray",
+        tabBarActiveTintColor: "#c77d94",
+        tabBarInactiveTintColor: "pink",
       })}
     >
       <Tab.Screen 

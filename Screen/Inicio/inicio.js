@@ -51,15 +51,7 @@ const [userName, setUserName] = useState("");
       <Text style={styles.title}>🎀 Bienvenido al sistema de Citas 🎀 {userName}</Text>
 
       <View style={styles.grid}>
-        {/* Recuadro 1 */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Citas", { screen: "ListarCitas" })}
-        >
-          <Ionicons name="calendar-outline" size={40} color="#cc3366" />
-          <Text style={styles.cardTitle}>Citas</Text>
-          <Text style={styles.cardDesc}>Ver y gestionar citas</Text>
-        </TouchableOpacity>
+        
 
         {/* Recuadro 2 */}
         <TouchableOpacity

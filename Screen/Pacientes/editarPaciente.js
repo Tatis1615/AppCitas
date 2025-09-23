@@ -53,41 +53,57 @@ export default function EditarPaciente({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff0f5", // fondo pastel
     padding: 20,
-    backgroundColor: "#fff0f5", // fondo rosadito
   },
   title: {
     fontSize: 22,
-    marginBottom: 20,
     fontWeight: "bold",
+    marginBottom: 20,
     color: "#cc3366",
     textAlign: "center",
   },
-  inputGroup: {
-    marginBottom: 15,
+  card: {
+    backgroundColor: "#ffe6f0",
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   label: {
     fontSize: 16,
-    marginBottom: 5,
-    color: "#333",
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#444",
   },
   input: {
     borderWidth: 1,
     borderColor: "#ffb6c1",
     borderRadius: 10,
     padding: 10,
-    backgroundColor: "#ffe6f0",
+    backgroundColor: "#fff",
+    fontSize: 16,
+    marginBottom: 12,
   },
   button: {
     backgroundColor: "pink",
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",
-    marginTop: 20,
+    marginBottom: 12,
+  },
+  secondaryButton: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#cc3366",
   },
   buttonText: {
-    color: "white",
-    fontWeight: "bold",
     fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
   },
 });
