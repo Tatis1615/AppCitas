@@ -7,6 +7,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Login from "./Screen/Auth/login";
 import Registro from "./Screen/Auth/registro";
 import Tabs from "./Src/Tabs";
+import TabsPaciente from "./Src/TabsPaciente";
 
 const Stack = createStackNavigator();
 
@@ -27,6 +28,11 @@ export default function App() {
         <Stack.Screen 
           name="Inicio" 
           component={Tabs} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="InicioPaciente" 
+          component={TabsPaciente} 
           options={{ headerShown: false }} 
         />
   

@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert} from "react-native";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert 
+} from "react-native";
+import { Picker } from "@react-native-picker/picker"; // 👈 para el selector
 import AsyncStorage from "@react-native-async-storage/async-storage"; 
-import API_BASE_URL from "../../Src/Config"; // Import para url 
+import API_BASE_URL from "../../Src/Config";
 
 export default function Registro({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState(""); // Rol por defecto
+  const [role, setRole] = useState(""); 
 
   const handleRegister = async () => {
     if (!name || !email || !password || !role) {
@@ -71,13 +79,19 @@ export default function Registro({ navigation }) {
         value={password}
         onChangeText={setPassword}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Rol"
-        placeholderTextColor="#cc6699"
-        value={role}
-        onChangeText={setRole}
-      />
+
+      {/* Selector de rol */}
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={role}
+          onValueChange={(itemValue) => setRole(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecciona un rol" value="" />
+          <Picker.Item label="Administrador" value="admin" />
+          <Picker.Item label="Paciente" value="paciente" />
+        </Picker>
+      </View>
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Registrarse</Text>
@@ -96,7 +110,7 @@ export default function Registro({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffe6f0", // Fondo rosado pastel
+    backgroundColor: "#ffe6f0",
     justifyContent: "center",
     padding: 20,
   },
@@ -115,6 +129,16 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 12,
     fontSize: 16,
+    color: "#660033",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ff99bb",
+    borderRadius: 12,
+    backgroundColor: "#fff0f5",
+    marginVertical: 8,
+  },
+  picker: {
     color: "#660033",
   },
   button: {

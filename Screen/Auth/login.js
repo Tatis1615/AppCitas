@@ -26,11 +26,19 @@ export default function Login({ navigation }) {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-
+        // Guardamos el token
         await AsyncStorage.setItem("token", data.access_token);
 
-        alert(data.message); 
-        navigation.navigate("Inicio"); // Redirige al inicio
+        alert(data.message);
+
+        // Verificamos el rol del usuario
+        if (data.user && data.user.role === "admin") {
+          navigation.navigate("Inicio"); // Pantalla para admin
+        } else if (data.user && data.user.role === "paciente") {
+          navigation.navigate("InicioPaciente"); // Pantalla para paciente
+        } else {
+          alert("Rol no reconocido, consulta con el administrador.");
+        }
       } else {
         alert(data.message || "Error en el login");
       }
@@ -77,7 +85,7 @@ export default function Login({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffe6f0", // Fondo rosado suave
+    backgroundColor: "#ffe6f0",
     justifyContent: "center",
     padding: 20,
   },

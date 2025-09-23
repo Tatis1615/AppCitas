@@ -1,39 +1,66 @@
-import React from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-
-const medicos = [
-  { id: "1", especialidad_id: "1", nombre: "Juan Pérez", edad: 30, telefono: "123456789" },
-  { id: "2", especialidad_id: "2", nombre: "María López", edad: 45, telefono: "987654321" },
-  { id: "3", especialidad_id: "3", nombre: "Carlos Ruiz", edad: 28, telefono: "456123789" },
-  { id: "4", especialidad_id: "1", nombre: "Ana Gómez", edad: 35, telefono: "321654987" }
-];
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
 
 export default function ListarMedicos({ navigation }) {
+  const [medicos, setMedicos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMedicos = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/medicos"); // 👉 cambia por tu URL real
+        const data = await response.json();
+        setMedicos(data);
+      } catch (error) {
+        console.error("Error cargando médicos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMedicos();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando médicos...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lista de Medicos</Text>
-
+      <Text style={styles.title}>👩‍⚕️ Lista de Médicos 👨‍⚕️</Text>
 
       <FlatList
         data={medicos}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => navigation.navigate("DetalleMedico", { medico: item })}
             style={styles.card}
           >
-            <Text style={styles.cardTitle}>{item.nombre}</Text>
-            <Text style={styles.cardSubtitle}>Edad: {item.edad}</Text>
+            {/* Si tu médico tiene foto */}
+            {item.foto && (
+              <Image source={{ uri: item.foto }} style={styles.avatar} />
+            )}
+            <View style={styles.info}>
+              <Text style={styles.cardTitle}>{item.nombre}</Text>
+              <Text style={styles.cardSubtitle}>Edad: {item.edad} años</Text>
+              <Text style={styles.cardSubtitle}>📞 {item.telefono}</Text>
+              <Text style={styles.cardSubtitle}>Especialidad ID: {item.especialidad_id}</Text>
+            </View>
           </TouchableOpacity>
         )}
       />
 
-      {/* Botón Crear Paciente */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("CrearMedico")}
       >
-        <Text style={styles.buttonText}>+ Crear Medico</Text>
+        <Text style={styles.buttonText}>+ Crear Médico</Text>
       </TouchableOpacity>
     </View>
   );
@@ -45,20 +72,30 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff0f5",
   },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   title: {
     fontSize: 22,
-    marginBottom: 10,
+    marginBottom: 15,
     fontWeight: "bold",
     color: "#cc3366",
     textAlign: "center",
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#ff99cc",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
     alignItems: "center",
-    marginBottom: 250,
+    marginTop: 20,
+    marginBottom: 50,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
     color: "white",
@@ -66,19 +103,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: {
+    flexDirection: "row",
+    alignItems: "center",
     padding: 15,
-    marginVertical: 5,
+    marginVertical: 8,
     backgroundColor: "#ffe6f0",
-    borderRadius: 10,
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: "#ffb6c1",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  avatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 15,
+    borderWidth: 2,
+    borderColor: "#ffb6c1",
+  },
+  info: {
+    flex: 1,
   },
   cardTitle: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
     color: "#333",
   },
   cardSubtitle: {
     color: "#555",
+    marginTop: 2,
   },
 });

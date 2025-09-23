@@ -1,72 +1,98 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function CrearCita({ navigation }) {
-  const [paciente_id, setPacienteId] = useState("");
   const [medico_id, setMedicoId] = useState("");
   const [consultorio_id, setConsultorioId] = useState("");
   const [fecha_hora, setFecha_hora] = useState("");
-  const [estado, setEstado] = useState("");
+  const [estado, setEstado] = useState("Pendiente"); // valor por defecto
   const [motivo, setMotivo] = useState("");
 
+  const handleCrear = async () => {
+    if (!medico_id || !consultorio_id || !fecha_hora || !estado || !motivo) {
+      Alert.alert("Error", "Por favor completa todos los campos");
+      return;
+    }
 
-  const handleCrear = () => {
-    if (paciente_id && medico_id && consultorio_id && fecha_hora && estado && motivo) {
-      alert("✅ Cita creada (simulado)");
-      navigation.navigate("ListarCitas");
-    } else {
-      alert("Por favor completa todos los campos");
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(`${API_BASE_URL}/crearCita`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          medico_id,
+          consultorio_id,
+          fecha_hora,
+          estado,
+          motivo,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Éxito", "✅ Cita creada correctamente");
+        navigation.navigate("ListarCitas");
+      } else {
+        console.log("Errores:", data);
+        Alert.alert("Error", data.message || "No se pudo crear la cita");
+      }
+    } catch (error) {
+      console.error("Error en crear cita:", error);
+      Alert.alert("Error", "Hubo un problema al conectar con el servidor");
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Agendar Nueva Cita</Text>
-        <TextInput
-            style={styles.input}
-            placeholder="ID del Paciente"
-            value={paciente_id}
-            onChangeText={setPacienteId}
-            keyboardType="numeric"
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="ID del Médico"
-            value={medico_id}
-            onChangeText={setMedicoId}
-            keyboardType="numeric"
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="ID del Consultorio"
-            value={consultorio_id}
-            onChangeText={setConsultorioId}
-            keyboardType="numeric"
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="Fecha y Hora (YYYY-MM-DD HH:MM)"
-            value={fecha_hora}
-            onChangeText={setFecha_hora}
-        />
-        <TextInput  
-            style={styles.input}
-            placeholder="Estado (e.g., agendada, completada, cancelada)"
-            value={estado}
-            onChangeText={setEstado}
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="Motivo de la cita"
-            value={motivo}
-            onChangeText={setMotivo}
-        />
+
+      <TextInput
+        style={styles.input}
+        placeholder="ID del Médico"
+        value={medico_id}
+        onChangeText={setMedicoId}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="ID del Consultorio"
+        value={consultorio_id}
+        onChangeText={setConsultorioId}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Fecha y Hora (YYYY-MM-DD HH:MM)"
+        value={fecha_hora}
+        onChangeText={setFecha_hora}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Estado (ej: Pendiente, Confirmada)"
+        value={estado}
+        onChangeText={setEstado}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Motivo de la cita"
+        value={motivo}
+        onChangeText={setMotivo}
+      />
+
       {/* Botón Crear */}
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
-        <Text style={styles.buttonText}>Crear Paciente</Text>
+        <Text style={styles.buttonText}>Crear Cita</Text>
       </TouchableOpacity>
 
-      {/* Botón Volver */}
+      {/* Botón Cancelar */}
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
         onPress={() => navigation.goBack()}

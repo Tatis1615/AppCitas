@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TouchableOpacity, 
+  StyleSheet, 
+  ActivityIndicator 
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Importamos la URL base de la API
+import API_BASE_URL from "../../Src/Config";
 
-export default function ListarConsultorios({ navigation }) {
-  const [consultorios, setConsultorios] = useState([]);
+export default function ListarCitasPaciente({ navigation }) {
+  const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchConsultorios = async () => {
+    const fetchCitas = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        const response = await fetch(`${API_BASE_URL}/listarConsultorios`, {
+        const response = await fetch(`${API_BASE_URL}/listarCitas`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -24,7 +31,7 @@ export default function ListarConsultorios({ navigation }) {
         const data = await response.json();
 
         if (response.ok) {
-          setConsultorios(data); // 👈 el backend debe devolver un array de citas
+          setCitas(data); // 👈 el backend debe devolver un array de citas
         } else {
           console.log("Error al obtener citas:", data);
         }
@@ -35,32 +42,32 @@ export default function ListarConsultorios({ navigation }) {
       }
     };
 
-    fetchConsultorios();
+    fetchCitas();
   }, []);
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={styles.container}>
         <ActivityIndicator size="large" color="#cc3366" />
-        <Text style={{ marginTop: 10, color: "#cc3366" }}>Cargando consultorios...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lista de Consultorios</Text>
+      <Text style={styles.title}>📅 Mis Citas</Text>
 
       <FlatList
-        data={consultorios}
+        data={citas}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetalleConsultorio", { consultorio: item })}
+            onPress={() => navigation.navigate("DetalleCita", { cita: item })}
             style={styles.card}
           >
-            <Text style={styles.cardTitle}>Consultorio N° {item.numero}</Text>
-            <Text style={styles.cardSubtitle}>Ubicación: {item.ubicacion}</Text>
+            <Text style={styles.cardTitle}>{item.fecha_hora}</Text>
+            <Text style={styles.cardSubtitle}>Estado: {item.estado}</Text>
+            <Text style={styles.cardSubtitle}>Motivo: {item.motivo}</Text>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
@@ -70,12 +77,12 @@ export default function ListarConsultorios({ navigation }) {
         }
       />
 
-      {/* Botón Crear Consultorio */}
+      {/* Botón Crear Cita */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("CrearConsultorio")}
+        onPress={() => navigation.navigate("CrearCita")}
       >
-        <Text style={styles.buttonText}>+ Crear Consultorio</Text>
+        <Text style={styles.buttonText}>+ Crear Cita</Text>
       </TouchableOpacity>
     </View>
   );
@@ -85,12 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff0f5",
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: "#fff0f5",
   },
   title: {
@@ -106,8 +107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 25,
     alignItems: "center",
-    marginBottom: 20,
-    marginTop: 15,
+    marginBottom: 250,
   },
   buttonText: {
     color: "white",
@@ -116,16 +116,11 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 15,
-    marginVertical: 6,
+    marginVertical: 5,
     backgroundColor: "#ffe6f0",
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ffb6c1",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   cardTitle: {
     fontWeight: "bold",
@@ -134,6 +129,5 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     color: "#555",
-    marginTop: 3,
   },
 });

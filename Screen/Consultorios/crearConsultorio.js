@@ -1,40 +1,67 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
-export default function CrearConsultrio({ navigation }) {
+export default function CrearConsultorio({ navigation }) {
   const [numero, setNumero] = useState("");
   const [ubicacion, setUbicacion] = useState("");
 
-  const handleCrear = () => {
-    if (nombre && edad && documento && telefono && direccion && email) {
-      alert("✅ Conusltorio creada (simulado)");
-      navigation.navigate("ListarConsultorios");
-    } else {
-      alert("Por favor completa todos los campos");
+  const handleCrear = async () => {
+    if (!numero || !ubicacion) {
+      Alet.alert("Por favor completa todos los campos");
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(`${API_BASE_URL}/crearConsultorio`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ numero, ubicacion }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Éxito", "✅ Consultorio creada correctamente");
+        navigation.navigate("ListarConsultorios");
+      } else {
+        console.log("Errores:", data);
+        Alert.alert("Error", data.message || "No se pudo crear la cita");
+      }
+    } catch (error) {
+      console.error("Error en crear cita:", error);
+      Alert.alert("Error", "Hubo un problema al conectar con el servidor");
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Agendar Nuevo Consultorio</Text>
-        <TextInput
-            style={styles.input}
-            placeholder="Numero del consultorio"
-            value={numero}
-            onChangeText={setNumero}
-        />
-        <TextInput
-            style={styles.input}
-            placeholder="Ubicación"
-            value={ubicacion}
-            onChangeText={setUbicacion}
-        />
-      {/* Botón Crear */}
+      <Text style={styles.title}>Registrar Nuevo Consultorio</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Número del consultorio"
+        value={numero}
+        onChangeText={setNumero}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Ubicación"
+        value={ubicacion}
+        onChangeText={setUbicacion}
+      />
+
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
-        <Text style={styles.buttonText}>Crear Paciente</Text>
+        <Text style={styles.buttonText}>Crear Consultorio</Text>
       </TouchableOpacity>
-      
-      {/* Botón Volver */}
+
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
         onPress={() => navigation.goBack()}

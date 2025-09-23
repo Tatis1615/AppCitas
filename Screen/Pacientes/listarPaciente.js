@@ -1,34 +1,75 @@
-import React from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-
-const pacientes = [
-  { id: "1", nombre: "Juan Pérez", edad: 30, documento: "12345678", telefono: "555-1234", direccion: "Calle Falsa 123", email: "perez@gmail.com"},
-  { id: "2", nombre: "María López", edad: 45, documento: "87654321", telefono: "555-5678", direccion: "Avenida Siempre Viva 742", email: "maria123@gmail.com"},
-  { id: "3", nombre: "Carlos Ruiz", edad: 28, documento: "11223344", telefono: "555-8765", direccion: "Boulevard Central 456", email: "ruiz@gmail.com"},
-  { id: "4", nombre: "Ana Gómez", edad: 35, documento: "44332211", telefono: "555-4321", direccion: "Calle Luna 789", email: "anag321@gmail.com"}
-];
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config"; // Importamos la URL base de la API
 
 export default function ListarPacientes({ navigation }) {
+  const [pacientes, setPacientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Llamar al backend para traer pacientes
+  useEffect(() => {
+    const fetchPacientes = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        const response = await fetch(`${API_BASE_URL}/listarPacientes`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setPacientes(data); // 👈 el backend debe devolver un array de citas
+        } else {
+          console.log("Error al obtener citas:", data);
+        }
+      } catch (error) {
+        console.error("Error en fetchCitas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPacientes();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando pacientes...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lista de Pacientes</Text>
 
-      {/* Lista de Pacientes */}
       <FlatList
         data={pacientes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => navigation.navigate("DetallePaciente", { paciente: item })}
             style={styles.card}
           >
-            <Text style={styles.cardTitle}>{item.nombre}</Text>
-            <Text style={styles.cardSubtitle}>Edad: {item.edad}</Text>
+            <Image source={{ uri: item.foto }} style={styles.avatar} />
+            <View style={styles.info}>
+              <Text style={styles.cardTitle}>{item.nombre}</Text>
+              <Text style={styles.cardSubtitle}>Edad: {item.edad} años</Text>
+              <Text style={styles.cardSubtitle}>📞 {item.telefono}</Text>
+            </View>
           </TouchableOpacity>
         )}
       />
 
-      {/* Botón Crear Paciente */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("CrearPaciente")}
@@ -45,20 +86,30 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff0f5",
   },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   title: {
     fontSize: 22,
-    marginBottom: 10,
+    marginBottom: 15,
     fontWeight: "bold",
     color: "#cc3366",
     textAlign: "center",
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#ff99cc",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
     alignItems: "center",
-    marginBottom: 250,
+    marginTop: 20,
+    marginBottom: 50,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
     color: "white",
@@ -66,19 +117,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: {
+    flexDirection: "row",
+    alignItems: "center",
     padding: 15,
-    marginVertical: 5,
+    marginVertical: 8,
     backgroundColor: "#ffe6f0",
-    borderRadius: 10,
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: "#ffb6c1",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  avatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 15,
+    borderWidth: 2,
+    borderColor: "#ffb6c1",
+  },
+  info: {
+    flex: 1,
   },
   cardTitle: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
     color: "#333",
   },
   cardSubtitle: {
     color: "#555",
+    marginTop: 2,
   },
 });
