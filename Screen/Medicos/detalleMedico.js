@@ -1,24 +1,99 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function DetalleMedico({ route, navigation }) {
-  const { medico } = route.params;
+  const { id } = route.params;
+  const [medico, setMedico] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [especialidadNombre, setEspecialidadNombre] = useState("");
+
+useEffect(() => {
+  const fetchMedico = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/medicos/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("No se pudo cargar el medico");
+
+      const data = await response.json();
+      setMedico(data);
+
+      if (data.especialidad_id) {
+        const espRes = await fetch(`${API_BASE_URL}/especialidades/${data.especialidad_id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (espRes.ok) {
+          const espData = await espRes.json();
+          setEspecialidadNombre(espData.nombre_e);
+        }
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ No se pudo cargar el médico");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMedico();
+}, [id]);
+
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando medico...</Text>
+      </View>
+    );
+  }
+
+  if (!medico) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red" }}>⚠️ No se encontró información</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Detalles del Médico</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Especialidad ID:</Text>
-        <Text style={styles.value}>{medico.especialidad_id}</Text>
+        <Text style={styles.label}>Especialidad:</Text>
+        <Text style={styles.value}>
+          {especialidadNombre || "Cargando..."}
+        </Text>
 
+        
         <Text style={styles.label}>Nombre:</Text>
-        <Text style={styles.value}>{medico.nombre}</Text>
+        <Text style={styles.value}>{medico.nombre_m}</Text>
+
+        <Text style={styles.label}>Apellido:</Text>
+        <Text style={styles.value}>{medico.apellido_m}</Text>
 
         <Text style={styles.label}>Edad:</Text>
         <Text style={styles.value}>{medico.edad}</Text>

@@ -33,7 +33,7 @@ const handleGuardar = async () => {
 
     if (response.ok) {
       alert("✅ Consultorio actualizado con éxito");
-      navigation.goBack();
+      navigation.navigate("ListarConsultorios");
     } else {
       console.log("⚠️ Backend respondió con error:", data);
       alert("❌ Error al actualizar el consultorio");

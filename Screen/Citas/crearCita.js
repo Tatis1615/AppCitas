@@ -1,17 +1,101 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
 export default function CrearCita({ navigation }) {
+  const [pacientes, setPacientes] = useState([]);
+  const [medicos, setMedicos] = useState([]);
+  const [consultorios, setConsultorios] = useState([]);
+  const [paciente_id, setPacienteId] = useState("")
   const [medico_id, setMedicoId] = useState("");
   const [consultorio_id, setConsultorioId] = useState("");
   const [fecha_hora, setFecha_hora] = useState("");
   const [estado, setEstado] = useState("Pendiente"); // valor por defecto
   const [motivo, setMotivo] = useState("");
 
+  useEffect(() => {
+    const fetchPacientes = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/listarPacientes`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("No se pudieron cargar los pacientes");
+
+        const data = await response.json();
+        setPacientes(data); // guardamos la lista
+      } catch (error) {
+        console.error("Error cargando pacientes:", error);
+        alert("❌ Error al cargar pacientes");
+      }
+    };
+
+    fetchPacientes();
+  }, []);
+
+  useEffect(() => {
+    const fetchMedicos = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/listarMedicos`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("No se pudieron cargar los medicos");
+
+        const data = await response.json();
+        setMedicos(data); // guardamos la lista
+      } catch (error) {
+        console.error("Error cargando medicos:", error);
+        alert("❌ Error al cargar medicos");
+      }
+    };
+
+    fetchMedicos();
+  }, []);
+
+  useEffect(() => {
+    const fetchConsultorios = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/listarConsultorios`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("No se pudieron cargar los consultorios");
+
+        const data = await response.json();
+        setConsultorios(data); // guardamos la lista
+      } catch (error) {
+        console.error("Error cargando consultorios:", error);
+        alert("❌ Error al cargar consultorios");
+      }
+    };
+
+    fetchConsultorios();
+  }, []);
+
+
   const handleCrear = async () => {
-    if (!medico_id || !consultorio_id || !fecha_hora || !estado || !motivo) {
+    if (!paciente_id || !medico_id || !consultorio_id || !fecha_hora || !estado || !motivo) {
       alert("Error", "Por favor completa todos los campos");
       return;
     }
@@ -27,6 +111,7 @@ export default function CrearCita({ navigation }) {
           Accept: "application/json",
         },
         body: JSON.stringify({
+          paciente_id,
           medico_id,
           consultorio_id,
           fecha_hora,
@@ -54,20 +139,39 @@ export default function CrearCita({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-      <TextInput
+      <Picker
+        selectedValue={paciente_id}
+        onValueChange={(itemValue) => setPacienteId(itemValue)}
         style={styles.input}
-        placeholder="ID del Médico"
-        value={medico_id}
-        onChangeText={setMedicoId}
-        keyboardType="numeric"
-      />
-      <TextInput
+      >
+        <Picker.Item label="Seleccione el paciente..." value="" />
+        {pacientes.map((esp) => (
+          <Picker.Item key={esp.id} label={esp.nombre} value={esp.id} />
+        ))}
+      </Picker>
+
+      <Picker
+        selectedValue={medico_id}
+        onValueChange={(itemValue) => setMedicoId(itemValue)}
         style={styles.input}
-        placeholder="ID del Consultorio"
-        value={consultorio_id}
-        onChangeText={setConsultorioId}
-        keyboardType="numeric"
-      />
+      >
+        <Picker.Item label="Seleccione el medico..." value="" />
+        {medicos.map((esp) => (
+          <Picker.Item key={esp.id} label={esp.nombre_m} value={esp.id} />
+        ))}
+      </Picker>
+
+      <Picker
+        selectedValue={consultorio_id}
+        onValueChange={(itemValue) => setConsultorioId(itemValue)}
+        style={styles.input}
+      >
+        <Picker.Item label="Seleccione un consultorio..." value="" />
+        {consultorios.map((esp) => (
+          <Picker.Item key={esp.id} label={esp.numero} value={esp.id} />
+        ))}
+      </Picker>
+
       <TextInput
         style={styles.input}
         placeholder="Fecha y Hora (YYYY-MM-DD HH:MM)"
@@ -76,7 +180,7 @@ export default function CrearCita({ navigation }) {
       />
       <TextInput
         style={styles.input}
-        placeholder="Estado (ej: Pendiente, Confirmada)"
+        placeholder="Estado de la cita"
         value={estado}
         onChangeText={setEstado}
       />

@@ -31,7 +31,7 @@ const handleGuardar = async () => {
 
     if (response.ok) {
       alert("✅ Paciente actualizado con éxito");
-      navigation.goBack();
+      navigation.navigate("ListarPacientes");
     } else {
       console.log("⚠️ Backend respondió con error:", data);
       alert("❌ Error al actualizar el paciente");

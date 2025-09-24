@@ -1,25 +1,63 @@
-import React from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-
-const citas = [
-  { id: "1", paciente_id: "1", medico_id: "2", consultorio_id: "2", fecha_hora: "2025-09-13", estado: "Pendiente", motivo: "Consulta general"},
-  { id: "2", paciente_id: "2", medico_id: "1", consultorio_id: "1", fecha_hora: "2025-09-14", estado: "Confirmada", motivo: "Revisión anual"},
-  { id: "3", paciente_id: "3", medico_id: "3", consultorio_id: "3", fecha_hora: "2025-09-15", estado: "Cancelada", motivo: "Dolor de cabeza"},
-  { id: "4", paciente_id: "4", medico_id: "4", consultorio_id: "4", fecha_hora: "2025-09-16", estado: "Pendiente", motivo: "Chequeo pediátrico"}
-];
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function ListarCitas({ navigation }) {
+  const [citas, setCitas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCitas = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        const response = await fetch(`${API_BASE_URL}/listarCitas`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setCitas(data);
+        } else {
+          console.log("Error al obtener citas:", data);
+        }
+      } catch (error) {
+        console.error("Error en fetchCitas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCitas();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#cc3366" />
+        <Text>Cargando citas...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lista de Citas</Text>
 
       <FlatList
         data={citas}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetalleCita", { cita: item })}
             style={styles.card}
+            onPress={() => navigation.navigate("DetalleCita", { id: item.id })}
           >
             <Text style={styles.cardTitle}>{item.fecha_hora}</Text>
             <Text style={styles.cardSubtitle}>Estado: {item.estado}</Text>

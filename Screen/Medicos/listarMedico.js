@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function ListarMedicos({ navigation }) {
   const [medicos, setMedicos] = useState([]);
@@ -8,11 +10,26 @@ export default function ListarMedicos({ navigation }) {
   useEffect(() => {
     const fetchMedicos = async () => {
       try {
-        const response = await fetch("http://localhost:5000/medicos"); // 👉 cambia por tu URL real
+        const token = await AsyncStorage.getItem("token");
+
+        const response = await fetch(`${API_BASE_URL}/listarMedicos`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
         const data = await response.json();
-        setMedicos(data);
+
+        if (response.ok) {
+          setMedicos(data);
+        } else {
+          console.log("Error al obtener medico:", data);
+        }
       } catch (error) {
-        console.error("Error cargando médicos:", error);
+        console.error("Error en fetchMedicos:", error);
       } finally {
         setLoading(false);
       }
@@ -32,25 +49,22 @@ export default function ListarMedicos({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>👩‍⚕️ Lista de Médicos 👨‍⚕️</Text>
+      <Text style={styles.title}>Lista de Médicos </Text>
 
       <FlatList
         data={medicos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetalleMedico", { medico: item })}
             style={styles.card}
+            onPress={() => navigation.navigate("DetalleMedico", { id: item.id })}
           >
             {/* Si tu médico tiene foto */}
-            {item.foto && (
-              <Image source={{ uri: item.foto }} style={styles.avatar} />
-            )}
+            <Image source={{ uri: "https://i.pinimg.com/1200x/1f/76/ac/1f76acfbd41313190d4ea2feb388d1f6.jpg" }} style={styles.avatar} />
             <View style={styles.info}>
-              <Text style={styles.cardTitle}>{item.nombre}</Text>
+              <Text style={styles.cardTitle}>{item.nombre_m}</Text>
               <Text style={styles.cardSubtitle}>Edad: {item.edad} años</Text>
-              <Text style={styles.cardSubtitle}>📞 {item.telefono}</Text>
-              <Text style={styles.cardSubtitle}>Especialidad ID: {item.especialidad_id}</Text>
+              <Text style={styles.cardSubtitle}>Telefono: {item.telefono}</Text>
             </View>
           </TouchableOpacity>
         )}

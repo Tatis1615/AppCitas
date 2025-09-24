@@ -1,47 +1,129 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  ScrollView,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function EditarMedico({ route, navigation }) {
   const { medico } = route.params;
-  const [especialidadId, setEspecialidadId] = useState(
-    String(medico.especialidad_id)
-  );
-  const [nombre, setNombre] = useState(medico.nombre);
+  const [especialidad_id, setEspecialidadId] = useState(medico.especialidad_id);
+  const [nombre_m, setNombre] = useState(medico.nombre_m);
+  const [apellido_m, setApellido] = useState(medico.apellido_m);
   const [edad, setEdad] = useState(String(medico.edad));
   const [telefono, setTelefono] = useState(medico.telefono);
+  const [especialidades, setEspecialidades] = useState([]);
 
-  const handleGuardar = () => {
-    Alert.alert(
-      "✅ Médico actualizado",
-      `Especialidad ID: ${especialidadId}\nNombre: ${nombre}\nEdad: ${edad}\nTeléfono: ${telefono}`
-    );
-    navigation.goBack();
+  useEffect(() => {
+    const fetchEspecialidades = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch(`${API_BASE_URL}/listarEspecialidades`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setEspecialidades(data); // 👈 Guardar especialidades en el estado
+        } else {
+          console.log("⚠️ Error cargando especialidades:", data);
+          alert("No se pudieron cargar las especialidades");
+        }
+      } catch (error) {
+        console.error("⚡ Error de red:", error);
+        alert("Error al conectar con el servidor");
+      }
+    };
+
+    fetchEspecialidades();
+  }, []);
+
+  const handleGuardar = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `${API_BASE_URL}/actualizarMedico/${medico.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            especialidad_id,
+            nombre_m,
+            apellido_m,
+            edad,
+            telefono,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("✅ Médico actualizado con éxito");
+        navigation.navigate("ListarMedicos");
+      } else {
+        console.log("⚠️ Backend respondió con error:", data);
+        alert("❌ Error al actualizar el médico");
+      }
+    } catch (error) {
+      console.error("⚡ Error de red:", error);
+      alert("⚠️ Error de conexión con el servidor");
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Editar Médico</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Especialidad ID:</Text>
-        <TextInput
-          value={especialidadId}
-          onChangeText={setEspecialidadId}
-          keyboardType="numeric"
-          style={styles.input}
-        />
+        <Text style={styles.label}>Especialidad:</Text>
+          <Picker
+            selectedValue={especialidad_id}
+            onValueChange={(itemValue) => setEspecialidadId(itemValue)}
+            style={styles.input}
+          >
+            <Picker.Item label="Seleccione una especialidad" value="" />
+            {especialidades.map((esp) => (
+              <Picker.Item
+                key={esp.id}
+                label={esp.nombre_e}
+                value={esp.id}
+              />
+            ))}
+          </Picker>
+
 
         <Text style={styles.label}>Nombre:</Text>
         <TextInput
-          value={nombre}
+          value={nombre_m}
           onChangeText={setNombre}
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Apellido:</Text>
+        <TextInput
+          value={apellido_m}
+          onChangeText={setApellido}
           style={styles.input}
         />
 
@@ -61,19 +143,17 @@ export default function EditarMedico({ route, navigation }) {
         />
       </View>
 
-      {/* Botón Guardar */}
       <TouchableOpacity style={styles.button} onPress={handleGuardar}>
         <Text style={styles.buttonText}>Guardar</Text>
       </TouchableOpacity>
 
-      {/* Botón Cancelar */}
       <TouchableOpacity
         style={[styles.button, styles.cancelButton]}
         onPress={() => navigation.goBack()}
       >
         <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -81,7 +161,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff0f5", // fondo pastel
+    backgroundColor: "#fff0f5",
   },
   title: {
     fontSize: 22,
@@ -110,6 +190,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: "#fff",
   },
+
   button: {
     backgroundColor: "pink",
     paddingVertical: 12,
