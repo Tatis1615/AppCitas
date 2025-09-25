@@ -5,8 +5,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import InicioPaciente from "../../Screen/Inicio/inicioPaciente"; 
 
 // Importa los stacks de cada módulo
-import PacientesStack from "./pacientesStack";
-import MedicosStack from "./medicosStack";
+import MedicosStack from "./medicosStackPaciente";
+import EspecialidadesStack from "./especialidadesStackPaciente"
 import CitasStackPaciente from "./citasStackPaciente";
 
 const Stack = createStackNavigator();
@@ -20,13 +20,13 @@ export default function InicioStack() {
         options={{ title: "Inicio" }} 
       />
       <Stack.Screen 
-        name="Pacientes" 
-        component={PacientesStack} 
+        name="Medicos" 
+        component={MedicosStack} 
         options={{ headerShown: false }} 
       />
       <Stack.Screen 
-        name="Medicos" 
-        component={MedicosStack} 
+        name="Especialidades" 
+        component={EspecialidadesStack} 
         options={{ headerShown: false }} 
       />
       <Stack.Screen 

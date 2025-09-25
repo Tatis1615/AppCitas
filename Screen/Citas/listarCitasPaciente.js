@@ -15,35 +15,37 @@ export default function ListarCitasPaciente({ navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCitas = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
+  const fetchCitas = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const userId = await AsyncStorage.getItem("user_id"); // 👈 recuperamos el id
 
-        const response = await fetch(`${API_BASE_URL}/listarCitas`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        });
+      const response = await fetch(`${API_BASE_URL}/listarCitas/${userId}`, { // 👈 se manda en la URL
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok) {
-          setCitas(data); // 👈 el backend debe devolver un array de citas
-        } else {
-          console.log("Error al obtener citas:", data);
-        }
-      } catch (error) {
-        console.error("Error en fetchCitas:", error);
-      } finally {
-        setLoading(false);
+      if (response.ok) {
+        setCitas(data);
+      } else {
+        console.log("Error al obtener citas:", data);
       }
-    };
+    } catch (error) {
+      console.error("Error en fetchCitas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchCitas();
-  }, []);
+  fetchCitas();
+}, []);
+
 
   if (loading) {
     return (
@@ -80,7 +82,7 @@ export default function ListarCitasPaciente({ navigation }) {
       {/* Botón Crear Cita */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("CrearCita")}
+        onPress={() => navigation.navigate("CrearCitaPaciente")}
       >
         <Text style={styles.buttonText}>+ Crear Cita</Text>
       </TouchableOpacity>

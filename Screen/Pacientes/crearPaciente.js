@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -11,7 +12,9 @@ export default function CrearPaciente({ navigation }) {
   const [email, setEmail] = useState("");
   const [fecha_nacimiento, setFecha_nacimiento] = useState("");
   const [direccion, setDireccion] = useState("");
-  
+
+  // estado para abrir/cerrar el picker
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleCrear = async () => {
     if (!nombre || !apellido || !documento || !telefono || !email || !fecha_nacimiento || !direccion) {
@@ -35,15 +38,24 @@ export default function CrearPaciente({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Éxito", "✅ Paciente creada correctamente");
+        alert("✅ Paciente creado correctamente");
         navigation.navigate("ListarPacientes");
       } else {
         console.log("Errores:", data);
-        alert("Error", data.message || "No se pudo crear la cita");
+        alert("❌ " + (data.message || "No se pudo crear el paciente"));
       }
     } catch (error) {
-      console.error("Error en crear cita:", error);
-      alert("Error", "Hubo un problema al conectar con el servidor");
+      console.error("Error en crear paciente:", error);
+      alert("Hubo un problema al conectar con el servidor");
+    }
+  };
+
+  // 📅 Manejar selección de fecha
+  const onChangeFecha = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const fechaFormateada = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      setFecha_nacimiento(fechaFormateada);
     }
   };
 
@@ -82,19 +94,30 @@ export default function CrearPaciente({ navigation }) {
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Fecha de nacimiento"
-        value={fecha_nacimiento}
-        onChangeText={setFecha_nacimiento}
-      />
+
+      {/* 📅 Campo de fecha */}
+      <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+        <Text style={{ color: fecha_nacimiento ? "#000" : "#707070ff" }}>
+          {fecha_nacimiento || "Selecciona fecha de nacimiento"}
+        </Text>
+      </TouchableOpacity>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={onChangeFecha}
+          maximumDate={new Date()} // no permitir fechas futuras
+        />
+      )}
+
       <TextInput
         style={styles.input}
         placeholder="Dirección"
         value={direccion}
         onChangeText={setDireccion}
       />
-      
 
       {/* Botón Crear */}
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
@@ -115,7 +138,7 @@ export default function CrearPaciente({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff0f5", // Fondo pastel suave
+    backgroundColor: "#fff0f5",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,

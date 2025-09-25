@@ -29,6 +29,12 @@ export default function Login({ navigation }) {
         // Guardamos el token
         await AsyncStorage.setItem("token", data.access_token);
 
+        // Guardamos el id y rol del usuario
+        if (data.user) {
+          await AsyncStorage.setItem("user_id", data.user.id.toString());
+          await AsyncStorage.setItem("user_role", data.user.role);
+        }
+
         alert(data.message);
 
         // Verificamos el rol del usuario

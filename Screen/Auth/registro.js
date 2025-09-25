@@ -81,17 +81,17 @@ export default function Registro({ navigation }) {
       />
 
       {/* Selector de rol */}
-      <View style={styles.pickerContainer}>
+
         <Picker
           selectedValue={role}
           onValueChange={(itemValue) => setRole(itemValue)}
-          style={styles.picker}
+          style={styles.input}
         >
           <Picker.Item label="Selecciona un rol" value="" />
           <Picker.Item label="Administrador" value="admin" />
           <Picker.Item label="Paciente" value="paciente" />
         </Picker>
-      </View>
+
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Registrarse</Text>
@@ -131,13 +131,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#660033",
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "#ff99bb",
-    borderRadius: 12,
-    backgroundColor: "#fff0f5",
-    marginVertical: 8,
-  },
+
   picker: {
     color: "#660033",
   },

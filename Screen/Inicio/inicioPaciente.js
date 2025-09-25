@@ -1,21 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  Image,
+  Animated,
+  Linking,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
+const { width } = Dimensions.get("window");
+
 export default function InicioPaciente({ navigation }) {
   const [userName, setUserName] = useState("");
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  // Imágenes del carrusel (puedes cambiarlas)
+  const images = [
+    "https://rautomation.es/wp-content/uploads/2023/12/especialista-biotecnologia-laboratorio-realizando-experimentos-1-1024x683.jpg",
+    "https://www.nosequeestudiar.net/site/assets/files/1695520/medicina-medico-estetoscopio.jpg",
+    "https://magnetosur.com/wp-content/uploads/2021/11/En-que-casos-se-debe-recurrir-a-la-medicina-general.jpg",
+  ];
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-          console.log("No hay token guardado");
-          return;
-        }
+        if (!token) return;
 
         const response = await fetch(`${API_BASE_URL}/me`, {
           headers: {
@@ -25,11 +43,10 @@ export default function InicioPaciente({ navigation }) {
         });
 
         const data = await response.json();
-
         if (response.ok) {
           setUserName(data.user?.name || "Usuario");
         } else {
-          console.log("Error en la respuesta:", data);
+          console.log("Error al obtener usuario:", data);
         }
       } catch (error) {
         console.error("Error obteniendo usuario:", error);
@@ -37,22 +54,91 @@ export default function InicioPaciente({ navigation }) {
     };
 
     fetchUser();
+
+    // Fade-in al cargar la pantalla
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 900,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
-  return (
-    <ScrollView style={styles.container}>
-        <View style={styles.banner}>
-        <Image
-          source={{ uri: "https://i.pinimg.com/736x/ba/b5/77/bab577ba83c49715dab31ba7d050d1dc.jpg" }} 
-          style={styles.bannerImage}
-        />
+  // llamadas de contacto
+  const handleCall = async (phone) => {
+    try {
+      const url = `tel:${phone}`;
+      const supported = await Linking.canOpenURL(url);
+      if (supported) await Linking.openURL(url);
+      else Alert.alert("No se puede realizar la llamada");
+    } catch (err) {
+      Alert.alert("Error", "No se pudo iniciar la llamada");
+    }
+  };
+
+  const handleOpenWeb = async (url) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) await Linking.openURL(url);
+      else Alert.alert("No se puede abrir el enlace");
+    } catch (err) {
+      Alert.alert("Error", "No se pudo abrir el enlace");
+    }
+  };
+
+  // Render del carrusel (ScrollView horizontal)
+  const renderCarousel = () => (
+    <View style={styles.carouselWrapper}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        {images.map((uri, i) => (
+          <View key={i} style={{ width, justifyContent: "center", alignItems: "center" }}>
+            <Image source={{ uri }} style={styles.carouselImage} resizeMode="cover" />
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Dots indicator */}
+      <View style={styles.dots}>
+        {images.map((_, i) => {
+          const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+          const opacity = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.3, 1, 0.3],
+            extrapolate: "clamp",
+          });
+          const scale = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.9, 1.15, 0.9],
+            extrapolate: "clamp",
+          });
+          return (
+            <Animated.View
+              key={`dot-${i}`}
+              style={[styles.dot, { opacity, transform: [{ scale }] }]}
+            />
+          );
+        })}
       </View>
-      {/* Encabezado */}
-      <Text style={styles.title}>🎀 Bienvenida {userName} 🎀</Text>
+    </View>
+  );
 
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+      {renderCarousel()}
 
-        {/* Servicios Destacados */}
-      <View style={styles.servicesSection}>
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <Text style={styles.title}>🎀 Bienvenida {userName} 🎀</Text>
+      </Animated.View>
+
+      <Animated.View style={[styles.servicesSection, { opacity: fadeAnim }]}>
         <Text style={styles.sectionTitle}>Nuestros Servicios</Text>
         <View style={styles.serviceGrid}>
           <View style={styles.serviceItem}>
@@ -72,42 +158,26 @@ export default function InicioPaciente({ navigation }) {
             <Text style={styles.serviceLabel}>Horarios Flexibles</Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
-
-      {/* Panel EPS con imagen */}
-      <View style={styles.epsCard}>
-        {/* Sección “Nosotros / Sobre EPS” */}
+      <Animated.View style={[styles.epsCard, { opacity: fadeAnim }]}>
         <Text style={styles.sectionTitle}>Sobre EPS Vida Salud</Text>
         <Text style={styles.sectionText}>
-            Nuestra EPS SaludVida Plus es un sistema de atención en salud diseñado para brindar 
-            confianza, bienestar y acompañamiento integral a cada uno de nuestros afiliados. Nuestro compromiso 
-            es garantizar el acceso oportuno a servicios médicos de calidad, con un enfoque humano y cercano.
-
-            Contamos con una red amplia de hospitales, clínicas, laboratorios y especialistas en diferentes 
-            áreas de la salud, lo que nos permite ofrecer una cobertura nacional con altos estándares de atención.
-            Nuestra prioridad es que los pacientes reciban un servicio seguro, oportuno y con la mejor experiencia posible.
-
-            En nuestra EPS creemos que cada persona merece una atención cálida y respetuosa, por eso hemos creado 
-            plataformas digitales que permiten agendar citas fácilmente, consultar resultados médicos y comunicarse 
-            directamente con profesionales de la salud, todo desde la comodidad del hogar.
-
-            Con más de 20 años de experiencia en el sector salud, trabajamos día a día para ser un aliado en la 
-            vida de nuestros usuarios, acompañándolos en cada etapa de su bienestar físico, mental y emocional.
+          Nuestra EPS SaludVida Plus es un sistema de atención en salud diseñado para brindar
+          confianza, bienestar y acompañamiento integral a cada uno de nuestros afiliados. Nuestro
+          compromiso es garantizar el acceso oportuno a servicios médicos de calidad, con un enfoque
+          humano y cercano.
         </Text>
-      </View>
+      </Animated.View>
 
-      
-
-      {/* Grid de accesos */}
       <View style={styles.grid}>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Pacientes", { screen: "ListarPacientes" })}
+          onPress={() => navigation.navigate("Especialidades", { screen: "ListarEspecialidadesPaciente" })}
         >
-          <Ionicons name="person-add-outline" size={40} color="#cc3366" />
-          <Text style={styles.cardTitle}>Pacientes</Text>
-          <Text style={styles.cardDesc}>Gestión de pacientes</Text>
+          <Ionicons name="business-outline" size={40} color="#cc3366" />
+          <Text style={styles.cardTitle}>Especialidades</Text>
+          <Text style={styles.cardDesc}>Gestión de especialidades</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -120,21 +190,21 @@ export default function InicioPaciente({ navigation }) {
         </TouchableOpacity>
       </View>
 
-
-
-      {/* Información de contacto */}
       <View style={styles.contactSection}>
         <Text style={styles.sectionTitle}>Contáctanos</Text>
+
         <View style={styles.contactItem}>
           <Ionicons name="call-outline" size={24} color="#cc3366" />
           <TouchableOpacity onPress={() => handleCall("+573165678901")}>
             <Text style={styles.contactText}>+57 316 567 8901</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.contactItem}>
           <Ionicons name="location-outline" size={24} color="#cc3366" />
           <Text style={styles.contactText}>Calle 123 #45-67, Bogotá</Text>
         </View>
+
         <View style={styles.contactItem}>
           <Ionicons name="globe-outline" size={24} color="#cc3366" />
           <TouchableOpacity onPress={() => handleOpenWeb("https://vida-salud-example.com")}>
@@ -147,159 +217,85 @@ export default function InicioPaciente({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff0f5", // pastel rosado
-    padding: 20,
+  container: { flex: 1, backgroundColor: "#fff0f5" },
+
+  carouselWrapper: {
+    height: 260,
+    marginTop: 12,
+    marginBottom: 8,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: "#cc3366",
-    textAlign: "center",
-  },
-  epsCard: {
-    backgroundColor: "#ffe6f0",
-    padding: 20,
-    borderRadius: 25,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: "#ffb6c1",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    alignItems: "center",
-  },
-  epsImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 15,
-  },
-  epsTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#cc3366",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  epsDesc: {
-    fontSize: 15,
-    color: "#444",
-    textAlign: "center",
-    marginBottom: 15,
-    lineHeight: 22,
-  },
-  epsList: {
-    alignItems: "flex-start",
-    width: "100%",
-  },
-  epsItem: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 5,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 12,
-  },
-  card: {
-    width: "40%",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 25,
-    alignItems: "center",
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+  carouselImage: {
+    width: width - 40,
+    height: 240,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#eee",
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 10,
-    color: "#333",
-  },
-  cardDesc: {
-    fontSize: 13,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 5,
-  },
-  banner: {
-    position: "relative",
-    height: 300,
-    marginBottom: 20,
-  },
-  bannerImage: {
-    width: "100%",
-    height: "100%",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-
-
-  infoSection: {
-    paddingHorizontal: 20,
-    marginBottom: 25,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#cc3366",
-    marginBottom: 8,
-  },
-  sectionText: {
-    fontSize: 15,
-    color: "#444",
-    lineHeight: 22,
-  },
-  servicesSection: {
-    paddingHorizontal: 20,
-    marginBottom: 25,
-  },
-  serviceGrid: {
+  dots: {
+    position: "absolute",
+    bottom: 8,
+    left: 0,
+    right: 0,
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
   },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 8,
+    backgroundColor: "#cc3366",
+    marginHorizontal: 6,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 14,
+    color: "#cc3366",
+    textAlign: "center",
+  },
+
+  servicesSection: { paddingHorizontal: 20, marginBottom: 18 },
+  serviceGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   serviceItem: {
-    width: "45%",
-    flexDirection: "column",
+    width: "48%",
     alignItems: "center",
     backgroundColor: "#ffe6f0",
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 15,
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
   },
-  serviceLabel: {
-    marginTop: 8,
-    fontSize: 14,
-    color: "#333",
-    textAlign: "center",
-  },
-  contactSection: {
-    paddingHorizontal: 20,
-    marginBottom: 25,
-  },
-  contactItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  contactText: {
-    marginLeft: 10,
-    fontSize: 15,
-    color: "#555",
-  },
+  serviceLabel: { marginTop: 8, fontSize: 14, color: "#333", textAlign: "center" },
 
-  
+  epsCard: {
+    backgroundColor: "#ffe6f0",
+    padding: 18,
+    borderRadius: 18,
+    marginBottom: 18,
+    marginHorizontal: 18,
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+  },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#cc3366", marginBottom: 8 },
+  sectionText: { fontSize: 14, color: "#444", lineHeight: 20 },
+
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 12, marginBottom: 18 },
+  card: {
+    width: "40%",
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 18,
+    alignItems: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  cardTitle: { fontSize: 16, fontWeight: "bold", marginTop: 8, color: "#333" },
+  cardDesc: { fontSize: 13, color: "#666", textAlign: "center", marginTop: 6 },
+
+  contactSection: { paddingHorizontal: 20, marginBottom: 30 },
+  contactItem: { flexDirection: "row", alignItems: "center", marginVertical: 6 },
+  contactText: { marginLeft: 10, fontSize: 15, color: "#555" },
 });
