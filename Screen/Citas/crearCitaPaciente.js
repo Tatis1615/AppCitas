@@ -1,148 +1,166 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
-export default function CrearCitaPaciente({ navigation }) {
-  const [pacientes, setPacientes] = useState([]);
+export default function CrearCitaPaciente({ route, navigation }) {
+  const { paciente_id } = route.params
   const [medicos, setMedicos] = useState([]);
   const [consultorios, setConsultorios] = useState([]);
-  const [fecha_hora, setFecha_hora] = useState("");
+  const [loading, setLoading] = useState(true)
+
+  const [idMedico, setIdMedico] = useState("")
+  const [idConsultorio, setIdConsultorio] = useState("")
+  const [fecha_hora, setFecha_hora] = useState(""); // formato final
   const [estado, setEstado] = useState("Pendiente"); // valor por defecto
   const [motivo, setMotivo] = useState("");
+  const [showTimePicker, setShowTimePicker] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
 
-  // 🔹 Cargar pacientes
   useEffect(() => {
-    const fetchPacientes = async () => {
+    const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/listarPacientes`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        });
+        const token = await AsyncStorage.getItem("token")
+        const [medRes, conRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/listarMedicos`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }),
+          fetch(`${API_BASE_URL}/listarConsultorios`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }),
+        ])
+        const medJson = await medRes.json()
+        const conJson = await conRes.json()
+        setMedicos(medJson)
+        setConsultorios(conJson)
 
-        if (!response.ok) throw new Error("No se pudieron cargar los pacientes");
-
-        const data = await response.json();
-        setPacientes(data);
-      } catch (error) {
-        console.error("Error cargando pacientes:", error);
+        if (medJson.length > 0) {
+          const randomMedico = medJson[Math.floor(Math.random() * medJson.length)]
+          setIdMedico(randomMedico.id)
+        }
+        if (conJson.length > 0) {
+          const randomConsultorio = conJson[Math.floor(Math.random() * conJson.length)]
+          setIdConsultorio(randomConsultorio.id)
+        }
+        setEstado("Pendiente")
+      } catch (e) {
+        console.error("Error cargando datos:", e)
+        alert("Error", "No se pudieron cargar médicos o consultorios")
+      } finally {
+        setLoading(false)
       }
-    };
-    fetchPacientes();
-  }, []);
+    }
+    fetchData()
+  }, [])
 
-  // 🔹 Cargar médicos
-  useEffect(() => {
-    const fetchMedicos = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/listarMedicos`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        });
-
-        if (!response.ok) throw new Error("No se pudieron cargar los médicos");
-
-        const data = await response.json();
-        setMedicos(data);
-      } catch (error) {
-        console.error("Error cargando médicos:", error);
-      }
-    };
-    fetchMedicos();
-  }, []);
-
-  // 🔹 Cargar consultorios
-  useEffect(() => {
-    const fetchConsultorios = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/listarConsultorios`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        });
-
-        if (!response.ok) throw new Error("No se pudieron cargar los consultorios");
-
-        const data = await response.json();
-        setConsultorios(data);
-      } catch (error) {
-        console.error("Error cargando consultorios:", error);
-      }
-    };
-    fetchConsultorios();
-  }, []);
-
-  // 🔹 Crear cita
   const handleCrear = async () => {
-    if (!pacientes || !medicos || !consultorios || !fecha_hora || !estado || !motivo) {
-      alert("Por favor completa todos los campos de la cita");
-      return;
+    if (!idMedico || !idConsultorio || !fecha_hora) {
+      alert("⚠️ Completa todos los campos")
+      return
     }
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      // Escoger aleatoriamente
-      const randomPaciente = pacientes[Math.floor(Math.random() * pacientes.length)];
-      const randomMedico = medicos[Math.floor(Math.random() * medicos.length)];
-      const randomConsultorio = consultorios[Math.floor(Math.random() * consultorios.length)];
-
+      const token = await AsyncStorage.getItem("token")
       const response = await fetch(`${API_BASE_URL}/crearCita`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
           Accept: "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          paciente_id: randomPaciente?.id,
-          medico_id: randomMedico?.id,
-          consultorio_id: randomConsultorio?.id,
-          fecha_hora,
+          paciente_id: paciente_id,
+          medico_id: idMedico,
+          consultorio_id: idConsultorio,
+          fecha,
+          hora,
           estado,
           motivo,
         }),
-      });
+      })
 
-      const data = await response.json();
-
+      const body = await response.json()
       if (response.ok) {
-        alert("✅ Cita creada correctamente");
-        navigation.navigate("ListarCitas");
+        alert("Cita creada correctamente")
+        navigation.navigate("ListarCitasPaciente")
       } else {
-        console.log("Errores:", data);
-        alert(data.message || "No se pudo crear la cita");
+        alert("Error", body.message || "Error creando cita")
       }
-    } catch (error) {
-      console.error("Error en crear cita:", error);
-      alert("Hubo un problema al conectar con el servidor");
+    } catch (e) {
+      console.error(e)
+      alert("Error", "Error de conexión")
+    }
+  }
+
+  // Manejar selección de hora
+  const onChangeTime = (event, selectedTime) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const finalDate = new Date(tempDate);
+      finalDate.setHours(selectedTime.getHours());
+      finalDate.setMinutes(selectedTime.getMinutes());
+
+      // Formato YYYY-MM-DD HH:mm
+      const fechaFormateada =
+        finalDate.toISOString().slice(0, 10) +
+        " " +
+        finalDate.toTimeString().slice(0, 5);
+
+      setFecha_hora(fechaFormateada);
     }
   };
+
+  if (loading)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#fdacd2" />
+        <Text style={{ marginTop: 10 }}>Cargando datos...</Text>
+      </View>
+    )
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Fecha y Hora (YYYY-MM-DD HH:MM)"
-        value={fecha_hora}
-        onChangeText={setFecha_hora}
-      />
+       {/* Médico */}
+        <Text style={styles.label}>Médico asignado</Text>
+        <View style={styles.selectButton}>
+          <Text style={styles.selectText}>
+            {idMedico ? `${medicos.find((m) => m.id === idMedico)?.nombre_m} ${medicos.find((m) => m.id === idMedico)?.apellido_m}` : "Seleccionando médico..."}
+          </Text>
+        </View>
+
+        {/* Consultorio */}
+        <Text style={styles.label}>Consultorio asignado</Text>
+        <View style={styles.selectButton}>
+          <Text style={styles.selectText}>
+            {idConsultorio ? `Consultorio ${consultorios.find((c) => c.id === idConsultorio)?.numero}` : "Seleccionando consultorio..."}
+          </Text>
+        </View>
+
+
+      {/* 📅 Selección de fecha y hora */}
+      <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+        <Text style={{ color: fecha_hora ? "#000" : "#888" }}>
+          {fecha_hora || "Selecciona fecha y hora"}
+        </Text>
+      </TouchableOpacity>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={onChangeDate}
+          minimumDate={new Date()} // evita fechas pasadas
+        />
+      )}
+
+      {showTimePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="time"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={onChangeTime}
+        />
+      )}
 
       <TextInput
         style={styles.input}

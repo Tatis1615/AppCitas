@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import ListarCitasPaciente from "../../Screen/Citas/listarCitasPaciente";
 import CrearCitaPaciente from "../../Screen/Citas/crearCitaPaciente";
 import DetalleCitaPaciente from "../../Screen/Citas/detalleCitaPaciente";
+import CrearPacienteCita from "../../Screen/Pacientes/crearPacienteCita";
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,11 @@ export default function CitasStackPaciente() {
         name="DetalleCitaPaciente"
         component={DetalleCitaPaciente}
         options={{ title: "Detalle de la Cita" }}
+      />
+      <Stack.Screen
+        name="CrearPacienteCita"
+        component={CrearPacienteCita}
+        options={{ title: "Crear cita del paciente"}}
       />
     </Stack.Navigator>
   );
