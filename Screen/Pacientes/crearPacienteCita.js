@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Platform,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
@@ -14,27 +22,112 @@ export default function CrearPacienteCita({ navigation }) {
   const [direccion, setDireccion] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const [role, setRole] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userEmail, setUserEmail] = useState(""); // 🔹 Nuevo estado
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch(`${API_BASE_URL}/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          console.log("/me responded not ok", res.status);
+          return;
+        }
+
+        const data = await res.json();
+        const user = data.user || data;
+
+        setRole(user?.role ?? null);
+        setUserId(user?.id ?? null);
+        setUserEmail(user?.email ?? ""); // 🔹 Guardamos email del login
+        setEmail(user?.email ?? "");     // 🔹 Fijamos también en tu campo email
+      } catch (err) {
+        console.error("Error fetching /me:", err);
+      }
+    };
+
+    fetchMe();
+  }, []);
+
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const fechaISO = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      setFecha_nacimiento(fechaISO);
+    }
+  };
+
   const handleCrear = async () => {
-    if (!nombre || !apellido || !documento || !telefono || !email || !fecha_nacimiento || !direccion) {
-      alert("⚠️ Por favor completa todos los campos");
+    // Validaciones mínimas
+    if (
+      !nombre ||
+      !apellido ||
+      !documento ||
+      !telefono ||
+      !email ||
+      !fecha_nacimiento ||
+      !direccion
+    ) {
+      Alert.alert("⚠️ Falta información", "Por favor completa todos los campos");
       return;
     }
 
     try {
       const token = await AsyncStorage.getItem("token");
-      const role = await AsyncStorage.getItem("role");
-
       if (!token) {
-        alert("No autenticado", "Debes iniciar sesión para crear pacientes");
+        Alert.alert("No autenticado", "Debes iniciar sesión para crear pacientes");
         navigation.navigate("Login");
         return;
       }
 
-      if (role !== "admin" && role !== "paciente") {
-        alert("Permisos insuficientes", "Solo usuarios con rol 'admin' o 'paciente' pueden crear pacientes");
+      // Si no tenemos rol en estado, pedir /me en el momento (fallback)
+      let currentRole = role;
+      if (!currentRole) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+          });
+          if (res.ok) {
+            const dd = await res.json();
+            const user = dd.user || dd;
+            currentRole = user?.role;
+            setRole(currentRole);
+            setUserId(user?.id ?? null);
+          } else {
+            console.log("/me fallback failed", res.status);
+          }
+        } catch (e) {
+          console.error("Error fetching /me in fallback:", e);
+        }
+      }
+
+      // Normalizar cadena y validar (case-insensitive)
+      const roleStr = (currentRole ?? "").toString().toLowerCase();
+      if (!(roleStr === "admin" || roleStr === "paciente")) {
+        Alert.alert(
+          "Permisos insuficientes",
+          `Solo usuarios con rol "admin" o "paciente" pueden crear pacientes. Rol actual: "${currentRole ?? "desconocido"}"`
+        );
         return;
       }
 
+      // Enviar creación al backend
       const response = await fetch(`${API_BASE_URL}/crearPaciente`, {
         method: "POST",
         headers: {
@@ -53,34 +146,37 @@ export default function CrearPacienteCita({ navigation }) {
         }),
       });
 
-      const body = await response.json();
+      const body = await response.json().catch(() => ({}));
 
       if (response.ok) {
         Alert.alert("✅ Éxito", body.message || "Paciente creado correctamente");
 
-        // Guardamos el id del paciente en AsyncStorage
-        if (body.data?.id) {
-          await AsyncStorage.setItem("paciente_id", body.data.id.toString());
-          console.log("✅ paciente_id guardado:", body.data.id);
+        // Guardar paciente_id si backend lo devuelve
+        const newId = body.data?.id ?? body.id ?? null;
+        if (newId) {
+          await AsyncStorage.setItem("paciente_id", String(newId));
+          console.log("paciente_id guardado:", newId);
         }
 
-        // Pasamos el paciente como parámetro a ListarMisCitas
-        navigation.navigate("ListarCitasPaciente", { paciente: body.data });
+        // Navegar a la pantalla deseada (puedes cambiar destino)
+        navigation.navigate("ListarCitasPaciente", { paciente: body.data ?? body });
         return;
       }
 
-      Alert.alert("Error", body.message || "No se pudo crear el paciente");
-
+      // Si no ok, mostrar errores (validaciones)
+      if (body.errors) {
+        // Laravel usually returns errors object
+        const firstKey = Object.keys(body.errors)[0];
+        const msg = Array.isArray(body.errors[firstKey])
+          ? body.errors[firstKey].join("\n")
+          : body.errors[firstKey];
+        Alert.alert("Error", msg);
+      } else {
+        Alert.alert("Error", body.message || JSON.stringify(body));
+      }
     } catch (error) {
       console.error("Error de conexión:", error);
       Alert.alert("Error", "Ocurrió un error al conectar con el servidor");
-    }
-  };
-
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setFecha_nacimiento(selectedDate.toISOString().split("T")[0]);
     }
   };
 
@@ -90,71 +186,81 @@ export default function CrearPacienteCita({ navigation }) {
         <Text style={styles.title}>Nuevo Paciente</Text>
 
         <Text style={styles.label}>Nombre</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Ej: Juan" 
-            value={nombre} 
-            onChangeText={setNombre} 
-            placeholderTextColor="#b0b0b0"
+        <TextInput
+          style={styles.input}
+          placeholder="Ej: Juan"
+          value={nombre}
+          onChangeText={setNombre}
+          placeholderTextColor="#b0b0b0"
         />
 
         <Text style={styles.label}>Apellido</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Ej: Pérez" 
-            value={apellido} 
-            onChangeText={setApellido} 
-            placeholderTextColor="#b0b0b0"
+        <TextInput
+          style={styles.input}
+          placeholder="Ej: Pérez"
+          value={apellido}
+          onChangeText={setApellido}
+          placeholderTextColor="#b0b0b0"
         />
 
         <Text style={styles.label}>Documento</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Ej: 12345678" 
-            value={documento} 
-            onChangeText={setDocumento} 
-            keyboardType="numeric" 
-            placeholderTextColor="#b0b0b0"
+        <TextInput
+          style={styles.input}
+          placeholder="Ej: 12345678"
+          value={documento}
+          onChangeText={setDocumento}
+          keyboardType="numeric"
+          placeholderTextColor="#b0b0b0"
         />
 
         <Text style={styles.label}>Teléfono</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Ej: 3001234567" 
-            value={telefono} 
-            onChangeText={setTelefono} 
-            keyboardType="phone-pad" 
-            placeholderTextColor="#b0b0b0"
+        <TextInput
+          style={styles.input}
+          placeholder="Ej: 3001234567"
+          value={telefono}
+          onChangeText={setTelefono}
+          keyboardType="phone-pad"
+          placeholderTextColor="#b0b0b0"
         />
 
         <Text style={styles.label}>Email</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Ej: correo@ejemplo.com" 
-            value={email} 
-            onChangeText={setEmail} 
-            keyboardType="email-address" 
-            placeholderTextColor="#b0b0b0"
+        <TextInput
+          style={[
+            styles.input,
+            role?.toLowerCase() === "paciente" && { backgroundColor: "#e6e6e6" }, // gris si bloqueado
+          ]}
+          placeholder="Ej: correo@ejemplo.com"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          placeholderTextColor="#b0b0b0"
+          editable={role?.toLowerCase() !== "paciente"} // 🔹 bloquea si paciente
         />
 
+
         <Text style={styles.label}>Fecha de nacimiento</Text>
-        <TouchableOpacity 
-        style={styles.input} 
-        onPress={() => setShowDatePicker(true)}>
-            
-          <Text style={{ color: fecha_nacimiento ? "#333" : "#b0b0b0" }}>{fecha_nacimiento || "Seleccione una fecha"}</Text>
+        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+          <Text style={{ color: fecha_nacimiento ? "#333" : "#b0b0b0" }}>
+            {fecha_nacimiento || "Seleccione una fecha"}
+          </Text>
         </TouchableOpacity>
+
         {showDatePicker && (
-          <DateTimePicker value={fecha_nacimiento ? new Date(fecha_nacimiento) : new Date()} mode="date" display={Platform.OS === "ios" ? "spinner" : "default"} onChange={handleDateChange}/>
+          <DateTimePicker
+            value={fecha_nacimiento ? new Date(fecha_nacimiento) : new Date()}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={handleDateChange}
+          />
         )}
 
         <Text style={styles.label}>Dirección</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Ej: Calle 123 #45-67" 
-            value={direccion} 
-            onChangeText={setDireccion} 
-            placeholderTextColor="#b0b0b0"
+        <TextInput
+          style={styles.input}
+          placeholder="Ej: Calle 123 #45-67"
+          value={direccion}
+          onChangeText={setDireccion}
+          placeholderTextColor="#b0b0b0"
         />
 
         <TouchableOpacity style={styles.button} onPress={handleCrear}>
@@ -164,7 +270,6 @@ export default function CrearPacienteCita({ navigation }) {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

@@ -29,9 +29,9 @@ export default function Login({ navigation }) {
         // Guardamos el token
         await AsyncStorage.setItem("token", data.access_token);
 
-        // Guardamos el id y rol del usuario
+        // Guardamos el email y rol del usuario
         if (data.user) {
-          await AsyncStorage.setItem("user_id", data.user.id.toString());
+          await AsyncStorage.setItem("paciente_email", email); // 👈 aquí se guarda el correo
           await AsyncStorage.setItem("user_role", data.user.role);
         }
 
@@ -48,6 +48,7 @@ export default function Login({ navigation }) {
       } else {
         alert(data.message || "Error en el login");
       }
+
     } catch (error) {
       console.error(error);
       alert("No se pudo conectar con el servidor");

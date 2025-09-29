@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
 export default function CrearCitaPaciente({ route, navigation }) {
-  const { paciente_id } = route.params
+  const { paciente_id } = route.params  // 👈 ahora sí llega correctamente
   const [medicos, setMedicos] = useState([]);
   const [consultorios, setConsultorios] = useState([]);
   const [loading, setLoading] = useState(true)
@@ -17,6 +17,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
   const [motivo, setMotivo] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
+  const [pacienteEmail, setPacienteEmail] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,14 +51,39 @@ export default function CrearCitaPaciente({ route, navigation }) {
     fetchData()
   }, [])
 
+
+
+  useEffect(() => {
+    const getEmail = async () => {
+      try {
+        const email = await AsyncStorage.getItem("paciente_email");
+        if (!email) {
+          alert("⚠️ Debes registrarte primero como paciente");
+          navigation.navigate("CrearPacienteCita");
+          return;
+        }
+        setPacienteEmail(email);
+        console.log("📧 Email del paciente cargado:", email);
+      } catch (error) {
+        console.error("Error obteniendo email:", error);
+      }
+    };
+    getEmail();
+  }, []);
+
+
   const handleCrear = async () => {
-    if (!idMedico || !idConsultorio || !fecha_hora) {
-      alert("⚠️ Completa todos los campos")
-      return
+    if (!pacienteEmail) {
+      alert("⚠️ No se encontró el email del paciente. Vuelve a iniciar sesión.");
+      return;
+    }
+    if (!idMedico || !idConsultorio || !motivo || !fecha_hora) {
+      alert("⚠️ Completa todos los campos");
+      return;
     }
 
     try {
-      const token = await AsyncStorage.getItem("token")
+      const token = await AsyncStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/crearCita`, {
         method: "POST",
         headers: {
@@ -66,30 +92,43 @@ export default function CrearCitaPaciente({ route, navigation }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          paciente_id: paciente_id,
+          email: pacienteEmail,  // 👈 email obligatorio
           medico_id: idMedico,
           consultorio_id: idConsultorio,
-          fecha,
-          hora,
+          fecha_hora,
           estado,
           motivo,
         }),
-      })
+      });
 
-      const body = await response.json()
+      const body = await response.json();
+      console.log("respuesta crear cita:", body);
+
       if (response.ok) {
-        alert("Cita creada correctamente")
-        navigation.navigate("ListarCitasPaciente")
+        alert("✅ Cita creada correctamente");
+        navigation.navigate("ListarCitasPaciente");
       } else {
-        alert("Error", body.message || "Error creando cita")
+        alert("❌ Error: " + (body.message || JSON.stringify(body)));
       }
     } catch (e) {
-      console.error(e)
-      alert("Error", "Error de conexión")
+      console.error(e);
+      alert("Error de conexión con el servidor");
     }
-  }
+  };
+
+
 
   // Manejar selección de hora
+  const [tempDate, setTempDate] = useState(new Date());
+
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setTempDate(selectedDate);
+      setShowTimePicker(true); // abrir selección de hora después
+    }
+  };
+
   const onChangeTime = (event, selectedTime) => {
     setShowTimePicker(false);
     if (selectedTime) {
@@ -97,7 +136,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
       finalDate.setHours(selectedTime.getHours());
       finalDate.setMinutes(selectedTime.getMinutes());
 
-      // Formato YYYY-MM-DD HH:mm
       const fechaFormateada =
         finalDate.toISOString().slice(0, 10) +
         " " +
@@ -106,6 +144,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
       setFecha_hora(fechaFormateada);
     }
   };
+
 
   if (loading)
     return (
@@ -117,77 +156,78 @@ export default function CrearCitaPaciente({ route, navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Agendar Nueva Cita</Text>
+        <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-       {/* Médico */}
-        <Text style={styles.label}>Médico asignado</Text>
-        <View style={styles.selectButton}>
-          <Text style={styles.selectText}>
-            {idMedico ? `${medicos.find((m) => m.id === idMedico)?.nombre_m} ${medicos.find((m) => m.id === idMedico)?.apellido_m}` : "Seleccionando médico..."}
+        {/* Médico */}
+          <Text style={styles.label}>Médico asignado</Text>
+          <View style={styles.selectButton}>
+            <Text style={styles.selectText}>
+              {idMedico ? `${medicos.find((m) => m.id === idMedico)?.nombre_m} ${medicos.find((m) => m.id === idMedico)?.apellido_m}` : "Seleccionando médico..."}
+            </Text>
+          </View>
+
+          {/* Consultorio */}
+          <Text style={styles.label}>Consultorio asignado</Text>
+          <View style={styles.selectButton}>
+            <Text style={styles.selectText}>
+              {idConsultorio ? `Consultorio ${consultorios.find((c) => c.id === idConsultorio)?.numero}` : "Seleccionando consultorio..."}
+            </Text>
+          </View>
+
+
+        {/* 📅 Selección de fecha y hora */}
+        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+          <Text style={{ color: fecha_hora ? "#000" : "#888" }}>
+            {fecha_hora || "Selecciona fecha y hora"}
           </Text>
-        </View>
+        </TouchableOpacity>
 
-        {/* Consultorio */}
-        <Text style={styles.label}>Consultorio asignado</Text>
-        <View style={styles.selectButton}>
-          <Text style={styles.selectText}>
-            {idConsultorio ? `Consultorio ${consultorios.find((c) => c.id === idConsultorio)?.numero}` : "Seleccionando consultorio..."}
-          </Text>
-        </View>
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={onChangeDate}
+            minimumDate={new Date()} // evita fechas pasadas
+          />
+        )}
 
+        {showTimePicker && (
+          <DateTimePicker
+            value={tempDate}
+            mode="time"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={onChangeTime}
+          />
+        )}
 
-      {/* 📅 Selección de fecha y hora */}
-      <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-        <Text style={{ color: fecha_hora ? "#000" : "#888" }}>
-          {fecha_hora || "Selecciona fecha y hora"}
-        </Text>
-      </TouchableOpacity>
-
-      {showDatePicker && (
-        <DateTimePicker
-          value={new Date()}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={onChangeDate}
-          minimumDate={new Date()} // evita fechas pasadas
+        <TextInput
+          style={styles.input}
+          placeholder="Estado de la cita"
+          value={estado}
+          onChangeText={setEstado}
         />
-      )}
 
-      {showTimePicker && (
-        <DateTimePicker
-          value={tempDate}
-          mode="time"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={onChangeTime}
+        <TextInput
+          style={styles.input}
+          placeholder="Motivo de la cita"
+          value={motivo}
+          onChangeText={setMotivo}
         />
-      )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Estado de la cita"
-        value={estado}
-        onChangeText={setEstado}
-      />
+        {/* Botón Crear */}
+        <TouchableOpacity style={styles.button} onPress={handleCrear}>
+          <Text style={styles.buttonText}>Crear Cita</Text>
+        </TouchableOpacity>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Motivo de la cita"
-        value={motivo}
-        onChangeText={setMotivo}
-      />
-
-      {/* Botón Crear */}
-      <TouchableOpacity style={styles.button} onPress={handleCrear}>
-        <Text style={styles.buttonText}>Crear Cita</Text>
-      </TouchableOpacity>
-
-      {/* Botón Cancelar */}
-      <TouchableOpacity
-        style={[styles.button, styles.secondaryButton]}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
-      </TouchableOpacity>
+        {/* Botón Cancelar */}
+        <TouchableOpacity
+          style={[styles.button, styles.secondaryButton]}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
+        </TouchableOpacity>
+        
     </ScrollView>
   );
 }
@@ -234,5 +274,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
+  },
+  selectButton: { 
+    width: "100%",
+    borderWidth: 1, 
+    borderColor: "#ffb6c1", 
+    borderRadius: 10, 
+    padding: 12, 
+    marginBottom: 8, 
+    backgroundColor: "#fff", 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center" 
   },
 });
