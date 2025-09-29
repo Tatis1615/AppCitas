@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import ModalSelector from "react-native-modal-selector";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -153,62 +154,34 @@ export default function EditarCita({ route, navigation }) {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      showsVerticalScrollIndicator={false}
-    >
-
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Editar Cita</Text>
 
-      <View style={styles.card}>
+
         <Text style={styles.label}>Paciente ID:</Text>
-          <Picker
-            selectedValue={paciente_id}
-            onValueChange={(itemValue) => setPacienteId(itemValue)}
-            style={styles.input}
-          >
-            <Picker.Item label="Seleccione el paciente" value="" />
-            {pacientes.map((esp) => (
-              <Picker.Item
-                key={esp.id}
-                label={esp.nombre}
-                value={esp.id}
-              />
-            ))}
-          </Picker>
+        <SelectInput
+          data={pacientes.map((esp) => ({ key: esp.id, label: esp.nombre, value: esp.id }))}
+          value={paciente_id}
+          onChange={setPacienteId}
+          placeholder="Seleccione el paciente..."
+        />
+ 
 
         <Text style={styles.label}>Médico ID:</Text>
-          <Picker
-            selectedValue={medico_id}
-            onValueChange={(itemValue) => setMedicoId(itemValue)}
-            style={styles.input}
-          >
-            <Picker.Item label="Seleccione el medicos" value="" />
-            {medicos.map((esp) => (
-              <Picker.Item
-                key={esp.id}
-                label={esp.nombre_m}
-                value={esp.id}
-              />
-            ))}
-          </Picker>
+        <SelectInput
+          data={medicos.map((esp) => ({ key: esp.id, label: esp.nombre_m }))}
+          value={medico_id}
+          onChange={setMedicoId}
+          placeholder="Seleccione el médico..."
+        />
 
         <Text style={styles.label}>Consultorio ID:</Text>
-          <Picker
-            selectedValue={consultorio_id}
-            onValueChange={(itemValue) => setConsultorioId(itemValue)}
-            style={styles.input}
-          >
-            <Picker.Item label="Seleccione un consultorio" value="" />
-            {consultorios.map((esp) => (
-              <Picker.Item
-                key={esp.id}
-                label={esp.numero}
-                value={esp.id}
-              />
-            ))}
-          </Picker>
+        <SelectInput
+          data={consultorios.map((esp) => ({ key: esp.id, label: `Consultorio ${esp.numero}` }))}
+          value={consultorio_id}
+          onChange={setConsultorioId}
+          placeholder="Seleccione un consultorio..."
+        />
 
         <Text style={styles.label}>Fecha y Hora:</Text>
         <TextInput
@@ -219,12 +192,17 @@ export default function EditarCita({ route, navigation }) {
         />
 
         <Text style={styles.label}>Estado de la cita:</Text>
-        <TextInput
+        <SelectInput
+          data={[
+            { key: "pendiente", label: "Pendiente" },
+            { key: "confirmada", label: "Confirmada" },
+            { key: "cancelada", label: "Cancelada" },
+          ]}
           value={estado}
-          onChangeText={setEstado}
-          style={styles.input}
-          placeholder="Estado"
+          onChange={setEstado}
+          placeholder="Seleccione el estado..."
         />
+
 
         <Text style={styles.label}>Motivo:</Text>
         <TextInput
@@ -233,7 +211,7 @@ export default function EditarCita({ route, navigation }) {
           style={styles.input}
           placeholder="Ej: Consulta general"
         />
-      </View>
+
 
       {/* Botón Guardar */}
       <TouchableOpacity style={styles.button} onPress={handleGuardar}>
@@ -249,12 +227,59 @@ export default function EditarCita({ route, navigation }) {
       </TouchableOpacity>
     </ScrollView>
   );
+
+function SelectInput({ data, value, onChange, placeholder }) {
+  return (
+    <ModalSelector
+      data={data}
+      initValue={placeholder}
+      onChange={(option) => onChange(option.key)}
+      cancelText="Cancelar"
+
+      optionContainerStyle={{
+        backgroundColor: "#fff0f5", // pastel rosa muy claro
+        borderRadius: 20,
+        padding: 10,
+      }}
+      optionTextStyle={{
+        fontSize: 16,
+        color: "#444",
+        paddingVertical: 10,
+      }}
+      cancelStyle={{
+        backgroundColor: "#ffe4e1", // rosa pastel
+        borderRadius: 20,
+        marginTop: 10,
+      }}
+      cancelTextStyle={{
+        fontSize: 16,
+        color: "#cc3366",
+        fontWeight: "bold",
+      }}
+      overlayStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+      initValueTextStyle={{ color: "#888", fontSize: 16 }}
+      selectTextStyle={{ color: "#000", fontSize: 16 }}
+      style={{ width: "100%", marginVertical: 8 }}
+    >
+      <View style={styles.inputSelect}>
+        <Text style={{ color: value ? "#000" : "#888", fontSize: 16 }}>
+          {value
+            ? data.find((d) => d.key === value)?.label
+            : placeholder}
+        </Text>
+      </View>
+    </ModalSelector>
+  );
+}
+
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff0f5", // fondo pastel
+    flexGrow: 1,
+    backgroundColor: "#fff0f5",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   title: {
@@ -264,38 +289,25 @@ const styles = StyleSheet.create({
     color: "#cc3366",
     textAlign: "center",
   },
-  card: {
-    backgroundColor: "#ffe6f0",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#444",
-  },
   input: {
+    width: "100%",
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ffb6c1",
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: "#fff",
-    fontSize: 16,
-    marginBottom: 12,
+    padding: 14,
+    borderRadius: 15,
+    marginVertical: 15,
+    justifyContent: "center",
+    elevation: 3,
   },
+
   button: {
     backgroundColor: "pink",
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",
-    marginBottom: 12,
+    marginTop: 15,
+    width: "100%",
   },
   secondaryButton: {
     backgroundColor: "white",
@@ -307,4 +319,27 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
   },
+  inputSelect: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+    padding: 14,
+    borderRadius: 15,
+    marginVertical: 8,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // sombra en Android
+  },
+  label: {
+    width: "100%",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#444",
+  },
+  
 });
