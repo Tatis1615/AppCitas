@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Platform,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import ModalSelector from "react-native-modal-selector";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -23,6 +24,11 @@ export default function EditarCita({ route, navigation }) {
   const [pacientes, setPacientes] = useState([]);
   const [medicos, setMedicos] = useState([]);
   const [consultorios, setConsultorios] = useState([]);
+
+    // Estados para el picker
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [tempDate, setTempDate] = useState(new Date());
 
 
   useEffect(() => {
@@ -153,6 +159,33 @@ export default function EditarCita({ route, navigation }) {
     }
   };
 
+   // Manejar selección de fecha
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setTempDate(selectedDate);
+      setShowTimePicker(true); // después de la fecha, mostrar hora
+    }
+  };
+
+  // Manejar selección de hora
+  const onChangeTime = (event, selectedTime) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const finalDate = new Date(tempDate);
+      finalDate.setHours(selectedTime.getHours());
+      finalDate.setMinutes(selectedTime.getMinutes());
+
+      // Formato YYYY-MM-DD HH:mm
+      const fechaFormateada =
+        finalDate.toISOString().slice(0, 10) +
+        " " +
+        finalDate.toTimeString().slice(0, 5);
+
+      setFecha_hora(fechaFormateada);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Editar Cita</Text>
@@ -183,13 +216,31 @@ export default function EditarCita({ route, navigation }) {
           placeholder="Seleccione un consultorio..."
         />
 
-        <Text style={styles.label}>Fecha y Hora:</Text>
-        <TextInput
-          value={fecha_hora}
-          onChangeText={setFecha_hora}
-          style={styles.input}
-          placeholder="YYYY-MM-DD HH:mm"
+        {/* 📅 Selección de fecha y hora */}
+        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+          <Text style={{ color: fecha_hora ? "#000" : "#888" }}>
+            {fecha_hora || "Selecciona fecha y hora"}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={onChangeDate}
+            minimumDate={new Date()} // evita fechas pasadas
+          />
+        )}
+
+        {showTimePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="time"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={onChangeTime}
         />
+      )}
 
         <Text style={styles.label}>Estado de la cita:</Text>
         <SelectInput
