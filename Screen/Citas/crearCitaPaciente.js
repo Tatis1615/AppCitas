@@ -10,6 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
@@ -187,40 +188,44 @@ export default function CrearCitaPaciente({ route, navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-      {/* Picker médicos (con nombre de especialidad) */}
+      {/* Picker médicos */}
       <Text style={styles.label}>Selecciona un médico</Text>
-
-        <Picker selectedValue={idMedico} onValueChange={(v) => setIdMedico(v)} style={styles.input}>
-          <Picker.Item label="Selecciona un médico..." value="" />
-          {medicos.map((m) => {
-            // comparación segura (string)
-            const especialidadNombre =
-              especialidades.find((e) => String(e.id) === String(m.especialidad_id))?.nombre_e ||
-              "Sin especialidad";
-            return (
-              <Picker.Item
-                key={m.id}
-                label={`${m.nombre_m} ${m.apellido_m} — ${especialidadNombre}`}
-                value={m.id}
-              />
-            );
-          })}
-        </Picker>
-
+      <Dropdown
+        style={styles.dropdown}
+        containerStyle={styles.dropdownContainer}
+        data={medicos.map((m) => {
+          const especialidadNombre =
+            especialidades.find((e) => String(e.id) === String(m.especialidad_id))?.nombre_e ||
+            "Sin especialidad";
+          return {
+            label: `${m.nombre_m} ${m.apellido_m} — ${especialidadNombre}`,
+            value: m.id,
+          };
+        })}
+        labelField="label"
+        valueField="value"
+        placeholder="Selecciona un médico..."
+        value={idMedico}
+        onChange={(item) => setIdMedico(item.value)}
+      />
 
       {/* Picker consultorios */}
       <Text style={styles.label}>Selecciona consultorio</Text>
+      <Dropdown
+        style={styles.dropdown}
+        containerStyle={styles.dropdownContainer}
+        data={consultorios.map((c) => ({
+          label: `Consultorio ${c.numero}`,
+          value: c.id,
+        }))}
+        labelField="label"
+        valueField="value"
+        placeholder="Selecciona un consultorio..."
+        value={idConsultorio}
+        onChange={(item) => setIdConsultorio(item.value)}
+      />
 
-        <Picker
-          selectedValue={idConsultorio}
-          onValueChange={(v) => setIdConsultorio(v)}
-          style={styles.input}
-        >
-          <Picker.Item label="Selecciona un consultorio..." value="" />
-          {consultorios.map((c) => (
-            <Picker.Item key={c.id} label={`Consultorio ${c.numero}`} value={c.id} />
-          ))}
-        </Picker>
+
 
 
       {/* Fecha/hora */}
@@ -304,13 +309,45 @@ const styles = StyleSheet.create({
     width: "100%",
     borderWidth: 1,
     borderColor: "#ffb6c1",
-    borderRadius: 10,
-    marginBottom: 8,
+    borderRadius: 12,
     backgroundColor: "#fff",
+    marginVertical: 8,
+    overflow: "hidden", // hace que las esquinas redondeadas se vean bien
+    elevation: 2, // sombra en Android
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   picker: {
     width: "100%",
     height: 50,
+    color: "#333",
   },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 6,
+    color: "#444",
+    width: "100%",
+  },
+
+  dropdown: {
+    width: "100%",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+    backgroundColor: "#fff",
+    marginVertical: 8,
+  },
+  dropdownContainer: {
+    borderRadius: 16,
+    backgroundColor: "#ffe4ec", // rosita suave
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+  },
+
+
 
 });

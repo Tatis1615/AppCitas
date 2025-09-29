@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -13,34 +14,46 @@ export default function EditarPaciente({ route, navigation }) {
   const [fecha_nacimiento, setFecha_nacimiento] = useState(paciente.fecha_nacimiento);
   const [direccion, setDireccion] = useState(paciente.direccion);
 
+  // estado para abrir/cerrar el picker
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-const handleGuardar = async () => {
-  try {
-    const token = await AsyncStorage.getItem("token");
-    const response = await fetch(`${API_BASE_URL}/actualizarPaciente/${paciente.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ nombre, apellido, documento, telefono, email, fecha_nacimiento, direccion }),
-    });
 
-    const data = await response.json();
+  const handleGuardar = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/actualizarPaciente/${paciente.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ nombre, apellido, documento, telefono, email, fecha_nacimiento, direccion }),
+      });
 
-    if (response.ok) {
-      alert("✅ Paciente actualizado con éxito");
-      navigation.navigate("ListarPacientes");
-    } else {
-      console.log("⚠️ Backend respondió con error:", data);
-      alert("❌ Error al actualizar el paciente");
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("✅ Paciente actualizado con éxito");
+        navigation.navigate("ListarPacientes");
+      } else {
+        console.log("⚠️ Backend respondió con error:", data);
+        alert("❌ Error al actualizar el paciente");
+      }
+    } catch (error) {
+      console.error("⚡ Error de red:", error);
+      alert("⚠️ Error de conexión con el servidor");
     }
-  } catch (error) {
-    console.error("⚡ Error de red:", error);
-    alert("⚠️ Error de conexión con el servidor");
-  }
-};
+  };
+
+  // 📅 Manejar selección de fecha
+  const onChangeFecha = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const fechaFormateada = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      setFecha_nacimiento(fechaFormateada);
+    }
+  };
 
 
 
@@ -90,12 +103,22 @@ const handleGuardar = async () => {
           placeholder="Email"
         />
         <Text style={styles.label}>Fecha de nacimiento:</Text>
-        <TextInput
-          value={fecha_nacimiento}
-          onChangeText={setFecha_nacimiento}
-          style={styles.input}
-          placeholder="Fecha nacimiento"
-        />
+         {/* 📅 Campo de fecha */}
+        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+          <Text style={{ color: fecha_nacimiento ? "#000" : "#707070ff" }}>
+            {fecha_nacimiento || "Selecciona fecha de nacimiento"}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={onChangeFecha}
+            maximumDate={new Date()} // no permitir fechas futuras
+          />
+        )}
         <Text style={styles.label}>Dirección:</Text>
         <TextInput
           value={direccion}

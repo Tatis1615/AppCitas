@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import ModalSelector from "react-native-modal-selector";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -76,17 +76,12 @@ export default function CrearMedico({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Registrar Nuevo Médico</Text>
 
-
-      <Picker
-        selectedValue={especialidad_id}
-        onValueChange={(itemValue) => setEspecialidadId(itemValue)}
-        style={styles.input}
-      >
-        <Picker.Item label="Seleccione una especialidad..." value="" />
-        {especialidades.map((esp) => (
-          <Picker.Item key={esp.id} label={esp.nombre_e} value={esp.id} />
-        ))}
-      </Picker>
+      <SelectInput
+        data={especialidades.map((esp) => ({ key: esp.id, label: esp.nombre_e }))}
+        value={especialidad_id}
+        onChange={setEspecialidadId}
+        placeholder="Seleccione la especialidad..."
+      />
 
       <TextInput
         style={styles.input}
@@ -128,7 +123,54 @@ export default function CrearMedico({ navigation }) {
       </TouchableOpacity>
     </ScrollView>
   );
+
+function SelectInput({ data, value, onChange, placeholder }) {
+  return (
+    <ModalSelector
+      data={data}
+      initValue={placeholder}
+      onChange={(option) => onChange(option.key)}
+      cancelText="Cancelar"
+
+      optionContainerStyle={{
+        backgroundColor: "#fff0f5", // pastel rosa muy claro
+        borderRadius: 20,
+        padding: 10,
+      }}
+      optionTextStyle={{
+        fontSize: 16,
+        color: "#444",
+        paddingVertical: 10,
+      }}
+      cancelStyle={{
+        backgroundColor: "#ffe4e1", // rosa pastel
+        borderRadius: 20,
+        marginTop: 10,
+      }}
+      cancelTextStyle={{
+        fontSize: 16,
+        color: "#cc3366",
+        fontWeight: "bold",
+      }}
+      overlayStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+      initValueTextStyle={{ color: "#888", fontSize: 16 }}
+      selectTextStyle={{ color: "#000", fontSize: 16 }}
+      style={{ width: "100%", marginVertical: 8 }}
+    >
+      <View style={styles.inputSelect}>
+        <Text style={{ color: value ? "#000" : "#888", fontSize: 16 }}>
+          {value
+            ? data.find((d) => d.key === value)?.label
+            : placeholder}
+        </Text>
+      </View>
+    </ModalSelector>
+  );
 }
+
+}
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -150,10 +192,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ffb6c1",
-    padding: 12,
-    marginVertical: 8,
-    borderRadius: 10,
-    fontSize: 16,
+    padding: 14,
+    borderRadius: 15,
+    marginVertical: 15,
+    justifyContent: "center",
+    elevation: 3,
   },
   button: {
     backgroundColor: "pink",
@@ -173,7 +216,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
   },
-
+  inputSelect: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+    padding: 14,
+    borderRadius: 15,
+    marginVertical: 8,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // sombra en Android
+  },
   
 });
 

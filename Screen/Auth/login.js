@@ -1,11 +1,18 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage"; 
-import API_BASE_URL from "../../Src/Config"; // Import para url 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "../../Src/Config";
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👈 controlamos visibilidad
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -26,29 +33,25 @@ export default function Login({ navigation }) {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        // Guardamos el token
         await AsyncStorage.setItem("token", data.access_token);
 
-        // Guardamos el email y rol del usuario
         if (data.user) {
-          await AsyncStorage.setItem("paciente_email", email); // 👈 aquí se guarda el correo
+          await AsyncStorage.setItem("paciente_email", email);
           await AsyncStorage.setItem("user_role", data.user.role);
         }
 
         alert(data.message);
 
-        // Verificamos el rol del usuario
         if (data.user && data.user.role === "admin") {
-          navigation.navigate("Inicio"); // Pantalla para admin
+          navigation.navigate("Inicio");
         } else if (data.user && data.user.role === "paciente") {
-          navigation.navigate("InicioPaciente"); // Pantalla para paciente
+          navigation.navigate("InicioPaciente");
         } else {
           alert("Rol no reconocido, consulta con el administrador.");
         }
       } else {
         alert(data.message || "Error en el login");
       }
-
     } catch (error) {
       console.error(error);
       alert("No se pudo conectar con el servidor");
@@ -66,14 +69,26 @@ export default function Login({ navigation }) {
         value={email}
         onChangeText={setEmail}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor="#cc6699"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+
+      {/* Input con botón de mostrar/ocultar contraseña */}
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { flex: 1, marginVertical: 0 }]}
+          placeholder="Contraseña"
+          placeholderTextColor="#cc6699"
+          secureTextEntry={!showPassword} // 👈 aquí cambia
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          style={styles.eyeButton}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          <Text style={{ fontSize: 18 }}>
+            {showPassword ? "👀" : "🔒"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Ingresar</Text>
@@ -112,6 +127,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 16,
     color: "#660033",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ff99bb",
+    backgroundColor: "#fff0f5",
+    borderRadius: 12,
+    marginVertical: 8,
+    paddingRight: 10,
+  },
+  eyeButton: {
+    padding: 8,
   },
   button: {
     backgroundColor: "#ff80aa",

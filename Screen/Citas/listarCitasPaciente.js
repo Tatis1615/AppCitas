@@ -156,15 +156,40 @@ export default function ListarCitasPaciente({ navigation }) {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#706180ff" />
-        <Text style={{ marginTop: 10, color: "#706180ff" }}>Cargando citas...</Text>
+        <ActivityIndicator size="large" color="#f58eb0ff" />
+        <Text style={{ marginTop: 10, color: "#f58eb0ff" }}>Cargando citas...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mis citas</Text>
+      <Text style={styles.title}>Lista de mis citas</Text>
+
+      {/* Botones arriba */}
+      <View style={styles.topButtons}>
+        <TouchableOpacity
+          style={[
+            styles.topButton,
+            { backgroundColor: isPaciente ? "#f58eb0ff" : "#aaa" },
+          ]}
+          disabled={!isPaciente}
+          onPress={handleCrearCita}
+        >
+          <Text style={styles.topButtonText}>Agregar citas</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.topButton,
+            { backgroundColor: isPaciente ? "#aaa" : "#f58eb0ff" },
+          ]}
+          disabled={isPaciente}
+          onPress={() => navigation.navigate("CrearPacienteCita")}
+        >
+          <Text style={styles.topButtonText}>Nuevo paciente</Text>
+        </TouchableOpacity>
+      </View>
 
       {citas.length === 0 ? (
         <Text style={styles.warningText}>
@@ -191,68 +216,33 @@ export default function ListarCitasPaciente({ navigation }) {
                   <Text style={styles.date}>{item.fecha_hora}</Text>
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <Text style={styles.doctor}>
-                      {item.medicos?.nombre_m ?? item.medico?.nombre_m ?? "Médico"}
-                      {" "}
+                      {item.medicos?.nombre_m ?? item.medico?.nombre_m ?? "Médico"}{" "}
                       {item.medicos?.apellido_m ?? item.medico?.apellido_m ?? ""}
                     </Text>
                     <View
                       style={[
                         styles.estadoBadge,
                         item.estado === "pendiente"
-                          ? { backgroundColor: "#fff4b3" }
+                          ? { backgroundColor: "#b3d8ffff" }
                           : item.estado === "confirmada"
-                          ? { backgroundColor: "#c6f6d5" }
-                          : { backgroundColor: "#feb2b2" },
+                          ? { backgroundColor: "#dfc6f6ff" }
+                          : { backgroundColor: "#ffc1d8ff" },
                       ]}
                     >
-                      <Text style={styles.estadoText}>{(item.estado ?? "").toUpperCase()}</Text>
+                      <Text style={styles.estadoText}>
+                        {(item.estado ?? "").toUpperCase()}
+                      </Text>
                     </View>
                   </View>
                 </View>
               </View>
-
-              <Ionicons name="chevron-forward-outline" size={24} color="#ffb6c1" />
             </TouchableOpacity>
           )}
         />
       )}
-
-      {/* Crear cita: habilitado sólo si isPaciente === true */}
-      <TouchableOpacity
-        style={[
-          styles.addButton,
-          { backgroundColor: isPaciente ? "#f58eb0ff" : "#aaa" },
-        ]}
-        disabled={!isPaciente}
-        onPress={handleCrearCita}
-      >
-        <Ionicons name="add-circle-outline" size={24} color="#fff" />
-        <Text style={styles.addButtonText}>Crear cita</Text>
-      </TouchableOpacity>
-
-      {/* Registrarme como paciente: habilitado sólo si isPaciente === false */}
-      <TouchableOpacity
-        style={[
-          styles.addButton,
-          { backgroundColor: isPaciente ? "#aaa" : "#f58eb0ff" },
-        ]}
-        disabled={isPaciente}
-        onPress={() => navigation.navigate("CrearPacienteCita")}
-      >
-        <Ionicons name="person-add-outline" size={24} color="#fff" />
-        <Text style={styles.addButtonText}>Registrarme como paciente</Text>
-      </TouchableOpacity>
-
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate ? new Date(selectedDate) : new Date()}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDateChange}
-        />
-      )}
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({ 
@@ -328,4 +318,25 @@ const styles = StyleSheet.create({
     borderRadius: 15, 
     marginLeft: 8, 
   }, 
+  topButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 15,
+    marginTop: 5,
+  },
+
+  topButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 10,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  topButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+
 });
