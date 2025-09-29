@@ -1,80 +1,118 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Platform } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
 
 export default function CrearCitaPaciente({ route, navigation }) {
-  const { paciente_id } = route.params  // 👈 ahora sí llega correctamente
+  const { paciente_id } = route.params;
   const [medicos, setMedicos] = useState([]);
   const [consultorios, setConsultorios] = useState([]);
-  const [loading, setLoading] = useState(true)
+  const [especialidades, setEspecialidades] = useState([]); // <- agregado
+  const [loading, setLoading] = useState(true);
 
-  const [idMedico, setIdMedico] = useState("")
-  const [idConsultorio, setIdConsultorio] = useState("")
-  const [fecha_hora, setFecha_hora] = useState(""); // formato final
-  const [estado, setEstado] = useState("Pendiente"); // valor por defecto
+  const [idMedico, setIdMedico] = useState("");
+  const [idConsultorio, setIdConsultorio] = useState("");
+  const [fecha_hora, setFecha_hora] = useState("");
+  const [estado, setEstado] = useState("Pendiente");
   const [motivo, setMotivo] = useState("");
-  const [showTimePicker, setShowTimePicker] = useState(false)
-  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [pacienteEmail, setPacienteEmail] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAll = async () => {
       try {
-        const token = await AsyncStorage.getItem("token")
-        const [medRes, conRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/listarMedicos`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }),
-          fetch(`${API_BASE_URL}/listarConsultorios`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }),
-        ])
-        const medJson = await medRes.json()
-        const conJson = await conRes.json()
-        setMedicos(medJson)
-        setConsultorios(conJson)
+        const token = await AsyncStorage.getItem("token");
+        const [medRes, conRes, espRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/listarMedicos`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+          }),
+          fetch(`${API_BASE_URL}/listarConsultorios`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+          }),
+          fetch(`${API_BASE_URL}/listarEspecialidades`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+          }),
+        ]);
 
-        if (medJson.length > 0) {
-          const randomMedico = medJson[Math.floor(Math.random() * medJson.length)]
-          setIdMedico(randomMedico.id)
+        const medJson = medRes.ok ? await medRes.json() : [];
+        const conJson = conRes.ok ? await conRes.json() : [];
+        const espJson = espRes.ok ? await espRes.json() : [];
+
+        setMedicos(Array.isArray(medJson) ? medJson : []);
+        setConsultorios(Array.isArray(conJson) ? conJson : []);
+        setEspecialidades(Array.isArray(espJson) ? espJson : []);
+
+        // Selección aleatoria inicial si quieres
+        if (Array.isArray(medJson) && medJson.length > 0) {
+          setIdMedico(medJson[0].id);
         }
-        if (conJson.length > 0) {
-          const randomConsultorio = conJson[Math.floor(Math.random() * conJson.length)]
-          setIdConsultorio(randomConsultorio.id)
+        if (Array.isArray(conJson) && conJson.length > 0) {
+          setIdConsultorio(conJson[0].id);
         }
-        setEstado("Pendiente")
       } catch (e) {
-        console.error("Error cargando datos:", e)
-        alert("Error", "No se pudieron cargar médicos o consultorios")
+        console.error("Error cargando medicos/consultorios/especialidades:", e);
+        alert("Error cargando datos. Revisa la consola.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchData()
-  }, [])
+    };
 
+    fetchAll();
+  }, []);
 
-
+  // cargar email del paciente (si lo guardaste antes)
   useEffect(() => {
     const getEmail = async () => {
       try {
         const email = await AsyncStorage.getItem("paciente_email");
-        if (!email) {
-          alert("⚠️ Debes registrarte primero como paciente");
-          navigation.navigate("CrearPacienteCita");
-          return;
+        if (email) {
+          setPacienteEmail(email);
+          console.log("Paciente email cargado:", email);
+        } else {
+          // Si no existe, opcionalmente usar paciente_id para pedir el email al backend
+          if (paciente_id) {
+            const token = await AsyncStorage.getItem("token");
+            if (token) {
+              try {
+                const res = await fetch(`${API_BASE_URL}/pacientes/${paciente_id}`, {
+                  headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+                });
+                if (res.ok) {
+                  const json = await res.json();
+                  const fetchedEmail = json.email || json.data?.email;
+                  if (fetchedEmail) {
+                    setPacienteEmail(fetchedEmail);
+                    await AsyncStorage.setItem("paciente_email", fetchedEmail);
+                  }
+                }
+              } catch (err) {
+                console.warn("No se pudo obtener email por paciente_id:", err);
+              }
+            }
+          }
         }
-        setPacienteEmail(email);
-        console.log("📧 Email del paciente cargado:", email);
-      } catch (error) {
-        console.error("Error obteniendo email:", error);
+      } catch (err) {
+        console.error("Error leyendo paciente_email:", err);
       }
     };
     getEmail();
-  }, []);
-
+  }, [paciente_id]);
 
   const handleCrear = async () => {
     if (!pacienteEmail) {
-      alert("⚠️ No se encontró el email del paciente. Vuelve a iniciar sesión.");
+      alert("⚠️ No se encontró el email del paciente. Vuelve a iniciar sesión o regístrate.");
       return;
     }
     if (!idMedico || !idConsultorio || !motivo || !fecha_hora) {
@@ -92,7 +130,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          email: pacienteEmail,  // 👈 email obligatorio
+          email: pacienteEmail,
           medico_id: idMedico,
           consultorio_id: idConsultorio,
           fecha_hora,
@@ -101,8 +139,8 @@ export default function CrearCitaPaciente({ route, navigation }) {
         }),
       });
 
-      const body = await response.json();
-      console.log("respuesta crear cita:", body);
+      const body = await response.json().catch(() => ({}));
+      console.log("crearCita -> response body:", body);
 
       if (response.ok) {
         alert("✅ Cita creada correctamente");
@@ -116,35 +154,26 @@ export default function CrearCitaPaciente({ route, navigation }) {
     }
   };
 
-
-
-  // Manejar selección de hora
+  // date/time pickers
   const [tempDate, setTempDate] = useState(new Date());
-
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setTempDate(selectedDate);
-      setShowTimePicker(true); // abrir selección de hora después
+      setShowTimePicker(true);
     }
   };
-
   const onChangeTime = (event, selectedTime) => {
     setShowTimePicker(false);
     if (selectedTime) {
       const finalDate = new Date(tempDate);
       finalDate.setHours(selectedTime.getHours());
       finalDate.setMinutes(selectedTime.getMinutes());
-
       const fechaFormateada =
-        finalDate.toISOString().slice(0, 10) +
-        " " +
-        finalDate.toTimeString().slice(0, 5);
-
+        finalDate.toISOString().slice(0, 10) + " " + finalDate.toTimeString().slice(0, 5);
       setFecha_hora(fechaFormateada);
     }
   };
-
 
   if (loading)
     return (
@@ -152,82 +181,66 @@ export default function CrearCitaPaciente({ route, navigation }) {
         <ActivityIndicator size="large" color="#fdacd2" />
         <Text style={{ marginTop: 10 }}>Cargando datos...</Text>
       </View>
-    )
+    );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Agendar Nueva Cita</Text>
+      <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-        {/* Médico */}
-          <Text style={styles.label}>Médico asignado</Text>
-          <View style={styles.selectButton}>
-            <Text style={styles.selectText}>
-              {idMedico ? `${medicos.find((m) => m.id === idMedico)?.nombre_m} ${medicos.find((m) => m.id === idMedico)?.apellido_m}` : "Seleccionando médico..."}
-            </Text>
-          </View>
+      {/* Picker médicos (con nombre de especialidad) */}
+      <Text style={styles.label}>Selecciona un médico</Text>
 
-          {/* Consultorio */}
-          <Text style={styles.label}>Consultorio asignado</Text>
-          <View style={styles.selectButton}>
-            <Text style={styles.selectText}>
-              {idConsultorio ? `Consultorio ${consultorios.find((c) => c.id === idConsultorio)?.numero}` : "Seleccionando consultorio..."}
-            </Text>
-          </View>
+        <Picker selectedValue={idMedico} onValueChange={(v) => setIdMedico(v)} style={styles.input}>
+          <Picker.Item label="Selecciona un médico..." value="" />
+          {medicos.map((m) => {
+            // comparación segura (string)
+            const especialidadNombre =
+              especialidades.find((e) => String(e.id) === String(m.especialidad_id))?.nombre_e ||
+              "Sin especialidad";
+            return (
+              <Picker.Item
+                key={m.id}
+                label={`${m.nombre_m} ${m.apellido_m} — ${especialidadNombre}`}
+                value={m.id}
+              />
+            );
+          })}
+        </Picker>
 
 
-        {/* 📅 Selección de fecha y hora */}
-        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-          <Text style={{ color: fecha_hora ? "#000" : "#888" }}>
-            {fecha_hora || "Selecciona fecha y hora"}
-          </Text>
-        </TouchableOpacity>
+      {/* Picker consultorios */}
+      <Text style={styles.label}>Selecciona consultorio</Text>
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={new Date()}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={onChangeDate}
-            minimumDate={new Date()} // evita fechas pasadas
-          />
-        )}
-
-        {showTimePicker && (
-          <DateTimePicker
-            value={tempDate}
-            mode="time"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={onChangeTime}
-          />
-        )}
-
-        <TextInput
+        <Picker
+          selectedValue={idConsultorio}
+          onValueChange={(v) => setIdConsultorio(v)}
           style={styles.input}
-          placeholder="Estado de la cita"
-          value={estado}
-          onChangeText={setEstado}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Motivo de la cita"
-          value={motivo}
-          onChangeText={setMotivo}
-        />
-
-        {/* Botón Crear */}
-        <TouchableOpacity style={styles.button} onPress={handleCrear}>
-          <Text style={styles.buttonText}>Crear Cita</Text>
-        </TouchableOpacity>
-
-        {/* Botón Cancelar */}
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
-          onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
-        </TouchableOpacity>
-        
+          <Picker.Item label="Selecciona un consultorio..." value="" />
+          {consultorios.map((c) => (
+            <Picker.Item key={c.id} label={`Consultorio ${c.numero}`} value={c.id} />
+          ))}
+        </Picker>
+
+
+      {/* Fecha/hora */}
+      <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+        <Text style={{ color: fecha_hora ? "#000" : "#888" }}>{fecha_hora || "Selecciona fecha y hora"}</Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker value={new Date()} mode="date" display={Platform.OS === "ios" ? "spinner" : "default"} onChange={onChangeDate} minimumDate={new Date()} />
+      )}
+      {showTimePicker && <DateTimePicker value={tempDate} mode="time" display={Platform.OS === "ios" ? "spinner" : "default"} onChange={onChangeTime} />}
+
+      <TextInput style={styles.input} placeholder="Motivo de la cita" value={motivo} onChangeText={setMotivo} />
+
+      <TouchableOpacity style={styles.button} onPress={handleCrear}>
+        <Text style={styles.buttonText}>Crear Cita</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => navigation.goBack()}>
+        <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -287,4 +300,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", 
     alignItems: "center" 
   },
+  selectWrapper: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+    borderRadius: 10,
+    marginBottom: 8,
+    backgroundColor: "#fff",
+  },
+  picker: {
+    width: "100%",
+    height: 50,
+  },
+
 });
