@@ -74,7 +74,7 @@ export default function DetalleCitaPaciente({ route, navigation }) {
         </Text>
 
         <Text style={styles.label}>Consultorio:</Text>
-        <Text style={styles.value}>{consultorio?.numero || "No disponible"}</Text>
+        <Text style={styles.value}>{consultorio?.numero || "702"}</Text>
 
         <Text style={styles.label}>Fecha y hora:</Text>
         <Text style={styles.value}>{cita.fecha_hora}</Text>
