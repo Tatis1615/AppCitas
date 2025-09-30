@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"; // 👈 importación
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -12,8 +13,6 @@ export default function CrearPaciente({ navigation }) {
   const [email, setEmail] = useState("");
   const [fecha_nacimiento, setFecha_nacimiento] = useState("");
   const [direccion, setDireccion] = useState("");
-
-  // estado para abrir/cerrar el picker
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleCrear = async () => {
@@ -24,7 +23,6 @@ export default function CrearPaciente({ navigation }) {
 
     try {
       const token = await AsyncStorage.getItem("token");
-
       const response = await fetch(`${API_BASE_URL}/crearPaciente`, {
         method: "POST",
         headers: {
@@ -41,7 +39,6 @@ export default function CrearPaciente({ navigation }) {
         alert("✅ Paciente creado correctamente");
         navigation.navigate("ListarPacientes");
       } else {
-        console.log("Errores:", data);
         alert("❌ " + (data.message || "No se pudo crear el paciente"));
       }
     } catch (error) {
@@ -50,52 +47,54 @@ export default function CrearPaciente({ navigation }) {
     }
   };
 
-  // 📅 Manejar selección de fecha
   const onChangeFecha = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      const fechaFormateada = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      const fechaFormateada = selectedDate.toISOString().split("T")[0];
       setFecha_nacimiento(fechaFormateada);
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      enableOnAndroid={true}
+      extraScrollHeight={70} // 👈 empuja inputs cuando aparece teclado
+    >
       <Text style={styles.title}>Crear Nuevo Paciente</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre"
-        value={nombre}
-        onChangeText={setNombre}
+      <TextInput 
+      style={styles.input} 
+      placeholder="Nombre" 
+      value={nombre} 
+      onChangeText={setNombre} 
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Apellido"
-        value={apellido}
-        onChangeText={setApellido}
+      <TextInput 
+      style={styles.input} 
+      placeholder="Apellido" 
+      value={apellido} 
+      onChangeText={setApellido} 
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Documento"
-        value={documento}
-        onChangeText={setDocumento}
+      <TextInput 
+      style={styles.input} 
+      placeholder="Documento" 
+      value={documento} 
+      onChangeText={setDocumento} 
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Teléfono"
-        value={telefono}
-        onChangeText={setTelefono}
+      <TextInput 
+      style={styles.input} 
+      placeholder="Teléfono" 
+      value={telefono} 
+      onChangeText={setTelefono} 
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+      <TextInput 
+      style={styles.input} 
+      placeholder="Email" 
+      value={email} 
+      onChangeText={setEmail} 
+      keyboardType="email-address" 
       />
 
-      {/* 📅 Campo de fecha */}
       <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
         <Text style={{ color: fecha_nacimiento ? "#000" : "#707070ff" }}>
           {fecha_nacimiento || "Selecciona fecha de nacimiento"}
@@ -108,30 +107,20 @@ export default function CrearPaciente({ navigation }) {
           mode="date"
           display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={onChangeFecha}
-          maximumDate={new Date()} // no permitir fechas futuras
+          maximumDate={new Date()}
         />
       )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Dirección"
-        value={direccion}
-        onChangeText={setDireccion}
-      />
+      <TextInput style={styles.input} placeholder="Dirección" value={direccion} onChangeText={setDireccion} />
 
-      {/* Botón Crear */}
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
         <Text style={styles.buttonText}>Crear Paciente</Text>
       </TouchableOpacity>
 
-      {/* Botón Volver */}
-      <TouchableOpacity
-        style={[styles.button, styles.secondaryButton]}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => navigation.goBack()}>
         <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -139,8 +128,6 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: "#fff0f5",
-    justifyContent: "center",
-    alignItems: "center",
     padding: 20,
   },
   title: {

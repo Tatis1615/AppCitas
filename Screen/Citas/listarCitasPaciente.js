@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     borderRadius: 15, 
     borderWidth: 1, 
     borderColor: "#ffb6c1", 
-    backgroundColor: "#fff", 
+    backgroundColor: "#ffe6f0", 
     marginBottom: 12, 
     flexDirection: "row", 
     alignItems: "center", 
