@@ -12,7 +12,7 @@ import API_BASE_URL from "../../Src/Config";
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👈 controlamos visibilidad
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -38,7 +38,9 @@ export default function Login({ navigation }) {
         if (data.user) {
           await AsyncStorage.setItem("paciente_email", email);
           await AsyncStorage.setItem("user_role", data.user.role);
+          await AsyncStorage.setItem("paciente_id", data.user.id.toString()); // 👈 GUARDA el ID del paciente
         }
+
 
         alert(data.message);
 
@@ -70,7 +72,7 @@ export default function Login({ navigation }) {
         onChangeText={setEmail}
       />
 
-      {/* Input con botón de mostrar/ocultar contraseña */}
+      {/* botón de mostrar/ocultar contraseña */}
       <View style={styles.passwordContainer}>
         <TextInput
           style={[styles.input, { flex: 1, marginVertical: 0 }]}

@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
 export default function CrearPaciente({ navigation }) {
+  const { user_id } = route.params;
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [documento, setDocumento] = useState("");
@@ -30,7 +31,7 @@ export default function CrearPaciente({ navigation }) {
           "Authorization": `Bearer ${token}`,
           Accept: "application/json",
         },
-        body: JSON.stringify({ nombre, apellido, documento, telefono, email, fecha_nacimiento, direccion }),
+        body: JSON.stringify({ user_id: user_id, nombre, apellido, documento, telefono, email, fecha_nacimiento, direccion }),
       });
 
       const data = await response.json();
@@ -59,7 +60,7 @@ export default function CrearPaciente({ navigation }) {
     <KeyboardAwareScrollView
       contentContainerStyle={styles.container}
       enableOnAndroid={true}
-      extraScrollHeight={70} // 👈 empuja inputs cuando aparece teclado
+      extraScrollHeight={70} 
     >
       <Text style={styles.title}>Crear Nuevo Paciente</Text>
 

@@ -73,7 +73,22 @@ export default function CrearCitaPaciente({ route, navigation }) {
     fetchAll();
   }, []);
 
-  // cargar email del paciente (si lo guardaste antes)
+  useEffect(() => {
+    const fetchPacienteId = async () => {
+      if (!paciente_id) {
+        const storedId = await AsyncStorage.getItem("paciente_id");
+        if (storedId) {
+          console.log("📦 paciente_id recuperado de AsyncStorage:", storedId);
+          route.params = { ...route.params, paciente_id: storedId };
+        } else {
+          alert("No se encontró el ID del paciente. Inicia sesión nuevamente.");
+        }
+      }
+    };
+    fetchPacienteId();
+  }, []);
+
+
   useEffect(() => {
     const getEmail = async () => {
       try {
@@ -82,7 +97,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
           setPacienteEmail(email);
           console.log("Paciente email cargado:", email);
         } else {
-          // Si no existe, opcionalmente usar paciente_id para pedir el email al backend
           if (paciente_id) {
             const token = await AsyncStorage.getItem("token");
             if (token) {
@@ -130,14 +144,16 @@ export default function CrearCitaPaciente({ route, navigation }) {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
+        
         body: JSON.stringify({
-          email: pacienteEmail,
+          paciente_id: paciente_id,
           medico_id: idMedico,
           consultorio_id: idConsultorio,
           fecha_hora,
           estado,
           motivo,
         }),
+
       });
 
       const body = await response.json().catch(() => ({}));
@@ -188,7 +204,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-      {/* Picker médicos */}
+      {/* médicos */}
       <Text style={styles.label}>Selecciona un médico</Text>
       <Dropdown
         style={styles.dropdown}
@@ -209,7 +225,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
         onChange={(item) => setIdMedico(item.value)}
       />
 
-      {/* Picker consultorios */}
+      {/* consultorios */}
       <Text style={styles.label}>Selecciona consultorio</Text>
       <Dropdown
         style={styles.dropdown}
@@ -312,8 +328,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#fff",
     marginVertical: 8,
-    overflow: "hidden", // hace que las esquinas redondeadas se vean bien
-    elevation: 2, // sombra en Android
+    overflow: "hidden",
+    elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -343,11 +359,8 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     borderRadius: 16,
-    backgroundColor: "#ffe4ec", // rosita suave
+    backgroundColor: "#ffe4ec", 
     borderWidth: 1,
     borderColor: "#ffb6c1",
   },
-
-
-
 });

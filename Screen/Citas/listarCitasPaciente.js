@@ -20,7 +20,6 @@ export default function ListarCitasPaciente({ navigation }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Estado claro: true = sí es paciente, false = no es paciente, null = aún no sé
   const [isPaciente, setIsPaciente] = useState(null);
   const [pacienteEmail, setPacienteEmail] = useState(null);
   const [pacienteId, setPacienteId] = useState(null);
@@ -36,7 +35,6 @@ export default function ListarCitasPaciente({ navigation }) {
           return;
         }
 
-        // 1) Llamada a /me para obtener email del usuario autenticado (fallback si backend no devuelve email)
         let userEmail = null;
         try {
           const meRes = await fetch(`${API_BASE_URL}/me`, {
@@ -50,15 +48,12 @@ export default function ListarCitasPaciente({ navigation }) {
               await AsyncStorage.setItem("user_email", userEmail);
             }
           } else {
-            // no critically failing — seguimos para intentar listar citas
             console.log("/me returned", meRes.status);
           }
         } catch (e) {
           console.warn("Error fetching /me:", e);
         }
 
-        // 2) Llamada a listarCitasPaciente (tu backend) — este endpoint debería devolver:
-        // { success: true, data: [...], email: "paciente@...", paciente_id: 123 } ó success:false si no es paciente
         const res = await fetch(`${API_BASE_URL}/listarCitasPaciente`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
@@ -68,9 +63,7 @@ export default function ListarCitasPaciente({ navigation }) {
         console.log("listarCitasPaciente response:", json);
 
         if (res.ok && json.success) {
-          // Backend OK -> lo tomo como paciente
           setCitas(json.data ?? []);
-          // extraigo email/id si vienen
           const emailFromResp = json.email ?? json.paciente?.email ?? null;
           const idFromResp = json.paciente_id ?? json.paciente?.id ?? null;
 
@@ -78,7 +71,6 @@ export default function ListarCitasPaciente({ navigation }) {
             setPacienteEmail(emailFromResp);
             await AsyncStorage.setItem("paciente_email", emailFromResp);
           } else if (userEmail) {
-            // si backend no devolvió email, uso el email de /me si existe
             setPacienteEmail(userEmail);
             await AsyncStorage.setItem("paciente_email", userEmail);
           }
@@ -90,18 +82,14 @@ export default function ListarCitasPaciente({ navigation }) {
 
           setIsPaciente(true);
         } else {
-          // No es paciente (o backend devolvió error). Asegurarse de limpiar cualquier dato previo.
           setCitas([]);
           setIsPaciente(false);
           await AsyncStorage.removeItem("paciente_email");
           await AsyncStorage.removeItem("paciente_id");
 
-          // Muestra alerta solo si la respuesta fue explícita
           if (res.ok && json.success === false) {
-            // backend explicitó que no es paciente
             console.log("Backend indica que no es paciente");
           } else {
-            // si la petición devolvió error (401/500) o formato inesperado, mostrar info en consola
             console.warn("listarCitasPaciente no devolvió success:true", res.status, json);
           }
         }
@@ -126,14 +114,12 @@ export default function ListarCitasPaciente({ navigation }) {
   };
 
   const handleCrearCita = async () => {
-    // Si todavía no sabemos si es paciente, pedimos que espere
     if (isPaciente === null) {
       Alert.alert("Espere", "Comprobando registro de paciente, inténtalo en un momento.");
       return;
     }
 
     if (!isPaciente) {
-      // No es paciente → redirigir a registrar
       Alert.alert(
         "Registro requerido",
         "Debes registrarte como paciente antes de crear una cita."
@@ -142,8 +128,6 @@ export default function ListarCitasPaciente({ navigation }) {
       return;
     }
 
-    // Si es paciente, pasar los datos al formulario de crear cita.
-    // Preferimos enviar paciente_id si existe, sino el email.
     const payloadPacienteId = await AsyncStorage.getItem("paciente_id");
     const payloadEmail = (await AsyncStorage.getItem("paciente_email")) ?? pacienteEmail;
 
@@ -185,7 +169,11 @@ export default function ListarCitasPaciente({ navigation }) {
             { backgroundColor: isPaciente ? "#aaa" : "#f58eb0ff" },
           ]}
           disabled={isPaciente}
-          onPress={() => navigation.navigate("CrearPacienteCita")}
+          onPress={async () => {
+            const paciente_id = await AsyncStorage.getItem("paciente_id");
+            console.log("🧠 paciente_id enviado:", paciente_id);
+            navigation.navigate("CrearCitaPaciente", { paciente_id });
+          }}
         >
           <Text style={styles.topButtonText}>Nuevo paciente</Text>
         </TouchableOpacity>
