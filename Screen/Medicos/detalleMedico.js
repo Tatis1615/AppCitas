@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -61,6 +62,47 @@ useEffect(() => {
 }, [id]);
 
 
+  const eliminarMedico = async () => {
+    Alert.alert(
+      "Confirmar eliminación",
+      "¿Estás segura de que deseas eliminar este medico?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              const response = await fetch(`${API_BASE_URL}/eliminarMedico/${id}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              });
+
+              const data = await response.json();
+
+              if (response.ok) {
+                Alert.alert("✅ Medico eliminado correctamente");
+                navigation.navigate("ListarMedicos"); 
+              } else {
+                console.error("Error del servidor:", data);
+                Alert.alert("❌ Error", data.message || "No se pudo eliminar el medico");
+              }
+            } catch (error) {
+              console.error("Error eliminando medico:", error);
+              Alert.alert("❌ Error de conexión con el servidor");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -108,6 +150,13 @@ useEffect(() => {
         onPress={() => navigation.navigate("EditarMedico", { medico })}
       >
         <Text style={styles.buttonText}>Editar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.deleteButton]}
+        onPress={eliminarMedico}
+      >
+        <Text style={[styles.buttonText, { color: "white" }]}>Eliminar</Text>
       </TouchableOpacity>
 
       {/* Botón Volver */}
@@ -171,5 +220,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
+  },
+  deleteButton: {
+    backgroundColor: "#ff4d4d",
   },
 });

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -24,10 +31,10 @@ export default function DetallePaciente({ route, navigation }) {
         if (!response.ok) throw new Error("No se pudo cargar el paciente");
 
         const data = await response.json();
-        setPaciente(data); 
+        setPaciente(data);
       } catch (error) {
         console.error(error);
-        alert("❌ No se pudo cargar el paciente");
+        Alert.alert("❌ No se pudo cargar el paciente");
       } finally {
         setLoading(false);
       }
@@ -35,6 +42,47 @@ export default function DetallePaciente({ route, navigation }) {
 
     fetchPaciente();
   }, [id]);
+
+  // 🔹 Función para eliminar paciente
+  const eliminarPaciente = async () => {
+    Alert.alert(
+      "Confirmar eliminación",
+      "¿Estás segura de que deseas eliminar este paciente?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              const response = await fetch(`${API_BASE_URL}/eliminarPaciente/${id}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              });
+
+              const data = await response.json();
+
+              if (response.ok) {
+                Alert.alert("✅ Paciente eliminado correctamente");
+                navigation.navigate("ListarPacientes"); // 🔹 Redirige a la lista
+              } else {
+                console.error("Error del servidor:", data);
+                Alert.alert("❌ Error", data.message || "No se pudo eliminar el paciente");
+              }
+            } catch (error) {
+              console.error("Error eliminando paciente:", error);
+              Alert.alert("❌ Error de conexión con el servidor");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   if (loading) {
     return (
@@ -52,7 +100,6 @@ export default function DetallePaciente({ route, navigation }) {
       </View>
     );
   }
-
 
   return (
     <View style={styles.container}>
@@ -79,10 +126,9 @@ export default function DetallePaciente({ route, navigation }) {
 
         <Text style={styles.label}>Dirección:</Text>
         <Text style={styles.value}>{paciente.direccion}</Text>
-
       </View>
 
-      {/* Botón Editar */}
+      {/* 🔹 Botón Editar */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("EditarPaciente", { paciente })}
@@ -90,7 +136,15 @@ export default function DetallePaciente({ route, navigation }) {
         <Text style={styles.buttonText}>Editar</Text>
       </TouchableOpacity>
 
-      {/* Botón Volver */}
+      {/* 🔹 Botón Eliminar */}
+      <TouchableOpacity
+        style={[styles.button, styles.deleteButton]}
+        onPress={eliminarPaciente}
+      >
+        <Text style={[styles.buttonText, { color: "white" }]}>Eliminar</Text>
+      </TouchableOpacity>
+
+      {/* 🔹 Botón Volver */}
       <TouchableOpacity
         style={[styles.button, styles.cancelButton]}
         onPress={() => navigation.goBack()}
@@ -105,7 +159,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff0f5", // Fondo pastel rosado
+    backgroundColor: "#fff0f5",
   },
   title: {
     fontSize: 22,
@@ -141,6 +195,9 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: "#cc3366",
+  },
+  deleteButton: {
+    backgroundColor: "#ff4d4d",
   },
   buttonText: {
     color: "white",

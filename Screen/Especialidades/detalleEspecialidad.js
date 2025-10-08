@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -37,6 +37,46 @@ export default function DetalleEspecialidad({ route, navigation }) {
     fetchEspecialidad();
   }, [id]);
 
+  const eliminarEspecialidad = async () => {
+    Alert.alert(
+      "Confirmar eliminación",
+      "¿Estás segura de que deseas eliminar esta especialidad?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              const response = await fetch(`${API_BASE_URL}/eliminarEspecialidad/${id}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              });
+
+              const data = await response.json();
+
+              if (response.ok) {
+                Alert.alert("✅ Especialidad eliminado correctamente");
+                navigation.navigate("ListarEspecialidades"); 
+              } else {
+                console.error("Error del servidor:", data);
+                Alert.alert("❌ Error", data.message || "No se pudo eliminar la especialidad");
+              }
+            } catch (error) {
+              console.error("Error eliminando especialidad:", error);
+              Alert.alert("❌ Error de conexión con el servidor");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -67,6 +107,13 @@ export default function DetalleEspecialidad({ route, navigation }) {
         onPress={() => navigation.navigate("EditarEspecialidad", { especialidad })}
       >
         <Text style={styles.buttonText}>Editar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.deleteButton]}
+        onPress={eliminarEspecialidad}
+      >
+        <Text style={[styles.buttonText, { color: "white" }]}>Eliminar</Text>
       </TouchableOpacity>
 
       {/* Botón Volver */}
@@ -125,5 +172,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#ff4d4d",
   },
 });
