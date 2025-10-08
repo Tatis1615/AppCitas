@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -42,7 +43,11 @@ export default function CrearConsultorio({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      enableOnAndroid={true}
+      extraScrollHeight={50} 
+    >
       <Text style={styles.title}>Registrar Nuevo Consultorio</Text>
 
       <TextInput
@@ -68,7 +73,7 @@ export default function CrearConsultorio({ navigation }) {
       >
         <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

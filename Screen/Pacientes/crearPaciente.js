@@ -127,7 +127,9 @@ export default function CrearPaciente({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff0f5",
+    backgroundColor: "#fff0f5", // Fondo pastel suave
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   title: {

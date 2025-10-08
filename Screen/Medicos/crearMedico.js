@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import ModalSelector from "react-native-modal-selector";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -73,7 +74,11 @@ export default function CrearMedico({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      enableOnAndroid={true}
+      extraScrollHeight={70} 
+    >
       <Text style={styles.title}>Registrar Nuevo Médico</Text>
 
       <SelectInput
@@ -121,7 +126,7 @@ export default function CrearMedico({ navigation }) {
       >
         <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 
 function SelectInput({ data, value, onChange, placeholder }) {
@@ -165,6 +170,7 @@ function SelectInput({ data, value, onChange, placeholder }) {
         </Text>
       </View>
     </ModalSelector>
+    
   );
 }
 

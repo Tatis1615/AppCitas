@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform, TextInput, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  TextInput,
+  Alert,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ModalSelector from "react-native-modal-selector";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,75 +30,37 @@ export default function CrearCita({ navigation }) {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [tempDate, setTempDate] = useState(new Date());
 
-  // Cargar pacientes
+  // ✅ Función genérica para cargar cualquier tipo de dato
+  const fetchData = async (endpoint, setter, errorMsg) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) throw new Error(errorMsg);
+      const data = await response.json();
+      setter(data);
+    } catch (error) {
+      console.error(`❌ ${errorMsg}:`, error);
+      Alert.alert("Error", errorMsg);
+    }
+  };
+
+  // ✅ Cargar todos los datos con un solo useEffect
   useEffect(() => {
-    const fetchPacientes = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/listarPacientes`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
-        const data = await response.json();
-        setPacientes(data);
-      } catch (error) {
-        console.error("Error cargando pacientes:", error);
-        Alert.alert("❌ Error al cargar pacientes");
-      }
-    };
-    fetchPacientes();
+    fetchData("listarPacientes", setPacientes, "Error al cargar pacientes");
+    fetchData("listarMedicos", setMedicos, "Error al cargar médicos");
+    fetchData("listarConsultorios", setConsultorios, "Error al cargar consultorios");
   }, []);
 
-  // Cargar médicos
-  useEffect(() => {
-    const fetchMedicos = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/listarMedicos`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
-        const data = await response.json();
-        setMedicos(data);
-      } catch (error) {
-        console.error("Error cargando médicos:", error);
-        Alert.alert("❌ Error al cargar médicos");
-      }
-    };
-    fetchMedicos();
-  }, []);
-
-  // Cargar consultorios
-  useEffect(() => {
-    const fetchConsultorios = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/listarConsultorios`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
-        const data = await response.json();
-        setConsultorios(data);
-      } catch (error) {
-        console.error("Error cargando consultorios:", error);
-        Alert.alert("❌ Error al cargar consultorios");
-      }
-    };
-    fetchConsultorios();
-  }, []);
-
-  // Crear cita
+  // ✅ Crear cita
   const handleCrear = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       const pacienteStorage = await AsyncStorage.getItem("paciente_id");
-
       const finalPacienteId = Number(pacienteId || pacienteStorage);
 
       if (!finalPacienteId || !medicoId || !consultorioId || !fechaHora || !motivo) {
@@ -96,21 +68,12 @@ export default function CrearCita({ navigation }) {
         return;
       }
 
-      console.log("📤 Datos que se envían a crearCita:", {
-        paciente_id: Number(pacienteStorage || pacienteId),
-        medico_id: Number(medicoId),
-        consultorio_id: Number(consultorioId),
-        fecha_hora: fechaHora,
-        motivo,
-      });
-
-
       const response = await fetch(`${API_BASE_URL}/crearCita`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
         },
         body: JSON.stringify({
           paciente_id: finalPacienteId,
@@ -121,7 +84,6 @@ export default function CrearCita({ navigation }) {
           motivo,
         }),
       });
-
 
       const data = await response.json();
 
@@ -138,7 +100,7 @@ export default function CrearCita({ navigation }) {
     }
   };
 
-  // Selección de fecha y hora
+  // ✅ Selección de fecha y hora
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -158,56 +120,37 @@ export default function CrearCita({ navigation }) {
     }
   };
 
-  // Selector 
-   function SelectInput({ data, value, onChange, placeholder }) {
-    return (
-      <ModalSelector
-        data={data}
-        initValue={placeholder}
-        onChange={(option) => onChange(option.key)}
-        cancelText="Cancelar"
-
-        optionContainerStyle={{
-          backgroundColor: "#fff0f5", // pastel rosa muy claro
-          borderRadius: 20,
-          padding: 10,
-        }}
-        optionTextStyle={{
-          fontSize: 16,
-          color: "#444",
-          paddingVertical: 10,
-        }}
-        cancelStyle={{
-          backgroundColor: "#ffe4e1", // rosa pastel
-          borderRadius: 20,
-          marginTop: 10,
-        }}
-        cancelTextStyle={{
-          fontSize: 16,
-          color: "#cc3366",
-          fontWeight: "bold",
-        }}
-        overlayStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        initValueTextStyle={{ color: "#888", fontSize: 16 }}
-        selectTextStyle={{ color: "#000", fontSize: 16 }}
-        style={{ width: "100%", marginVertical: 8 }}
-      >
-        <View style={styles.inputSelect}>
-          <Text style={{ color: value ? "#000" : "#888", fontSize: 16 }}>
-            {value
-              ? data.find((d) => d.key === value)?.label
-              : placeholder}
-          </Text>
-        </View>
-      </ModalSelector>
-    );
-  }
+  // ✅ Componente de selector (limpio)
+  const SelectInput = ({ data, value, onChange, placeholder }) => (
+    <ModalSelector
+      data={data}
+      initValue={placeholder}
+      onChange={(option) => onChange(option.key)}
+      cancelText="Cancelar"
+      optionContainerStyle={{ backgroundColor: "#fff0f5", borderRadius: 20, padding: 10 }}
+      optionTextStyle={{ fontSize: 16, color: "#444", paddingVertical: 10 }}
+      cancelStyle={{ backgroundColor: "#ffe4e1", borderRadius: 20, marginTop: 10 }}
+      cancelTextStyle={{ fontSize: 16, color: "#cc3366", fontWeight: "bold" }}
+      overlayStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+      initValueTextStyle={{ color: "#888", fontSize: 16 }}
+      style={{ width: "100%", marginVertical: 8 }}
+    >
+      <View style={styles.inputSelect}>
+        <Text style={{ color: value ? "#000" : "#888", fontSize: 16 }}>
+          {value ? data.find((d) => d.key === value)?.label : placeholder}
+        </Text>
+      </View>
+    </ModalSelector>
+  );
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      enableOnAndroid={true}
+      extraScrollHeight={50} 
+    >
       <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-      {/* Paciente */}
       <SelectInput
         data={pacientes.map((p) => ({ key: p.id, label: p.nombre }))}
         value={pacienteId}
@@ -215,7 +158,6 @@ export default function CrearCita({ navigation }) {
         placeholder="Seleccione el paciente..."
       />
 
-      {/* Médico */}
       <SelectInput
         data={medicos.map((m) => ({ key: m.id, label: m.nombre_m }))}
         value={medicoId}
@@ -223,7 +165,6 @@ export default function CrearCita({ navigation }) {
         placeholder="Seleccione el médico..."
       />
 
-      {/* Consultorio */}
       <SelectInput
         data={consultorios.map((c) => ({ key: c.id, label: `Consultorio ${c.numero}` }))}
         value={consultorioId}
@@ -231,7 +172,6 @@ export default function CrearCita({ navigation }) {
         placeholder="Seleccione el consultorio..."
       />
 
-      {/* Fecha y hora */}
       <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
         <Text style={{ color: fechaHora ? "#000" : "#888" }}>
           {fechaHora || "Selecciona fecha y hora"}
@@ -247,7 +187,6 @@ export default function CrearCita({ navigation }) {
           minimumDate={new Date()}
         />
       )}
-
       {showTimePicker && (
         <DateTimePicker
           value={tempDate}
@@ -257,7 +196,6 @@ export default function CrearCita({ navigation }) {
         />
       )}
 
-      {/* Motivo */}
       <TextInput
         style={styles.input}
         placeholder="Motivo de la cita"
@@ -265,7 +203,6 @@ export default function CrearCita({ navigation }) {
         onChangeText={setMotivo}
       />
 
-      {/* Botones */}
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
         <Text style={styles.buttonText}>Crear Cita</Text>
       </TouchableOpacity>
@@ -276,7 +213,7 @@ export default function CrearCita({ navigation }) {
       >
         <Text style={[styles.buttonText, { color: "#cc3366" }]}>Cancelar</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -306,7 +243,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     elevation: 3,
   },
-
+  inputSelect: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+    padding: 14,
+    borderRadius: 15,
+    marginVertical: 8,
+    justifyContent: "center",
+    elevation: 3,
+  },
   button: {
     backgroundColor: "pink",
     paddingVertical: 14,
@@ -324,20 +271,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
-  },
-  inputSelect: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ffb6c1",
-    padding: 14,
-    borderRadius: 15,
-    marginVertical: 8,
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, 
   },
 });

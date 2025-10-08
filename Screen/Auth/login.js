@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -61,7 +62,11 @@ export default function Login({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      enableOnAndroid={true}
+      extraScrollHeight={50} 
+    >
       <Text style={styles.title}>💖 Iniciar Sesión 💖</Text>
 
       <TextInput
@@ -102,7 +107,7 @@ export default function Login({ navigation }) {
       >
         <Text style={styles.buttonText}>Registrarse</Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAwareScrollView>
   );
 }
 

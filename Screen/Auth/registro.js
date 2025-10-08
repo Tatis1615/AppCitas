@@ -9,7 +9,7 @@ import {
   ScrollView,
   Platform
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
@@ -139,15 +139,20 @@ export default function Registro({ navigation }) {
         onChangeText={setPassword}
       />
 
-      <Picker
-        selectedValue={role}
-        onValueChange={(itemValue) => setRole(itemValue)}
-        style={styles.input}
-      >
-        <Picker.Item label="Selecciona un rol" value="" />
-        <Picker.Item label="Administrador" value="admin" />
-        <Picker.Item label="Paciente" value="paciente" />
-      </Picker>
+      <Dropdown
+        style={styles.dropdown}
+        containerStyle={styles.dropdownContainer}
+        data={[
+          { label: "Administrador", value: "admin" },
+          { label: "Paciente", value: "paciente" },
+        ]}
+        labelField="label"
+        valueField="value"
+        placeholder="Selecciona un rol"
+        value={role}
+        onChange={(item) => setRole(item.value)}
+        placeholderStyle={styles.placeholderStyle}
+      />
 
       {/* 🔹 FORMULARIO EXTRA SI ES PACIENTE */}
       {role === "paciente" && (
@@ -279,5 +284,24 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "600",
+  },
+  dropdown: {
+    width: "100%",
+    borderRadius: 13,
+    padding: 13,
+    borderWidth: 1,
+    borderColor: "#ff99bb",
+    backgroundColor: "#fff5f8",
+    marginVertical: 8,
+  },
+  dropdownContainer: {
+    borderRadius: 12,
+    backgroundColor: "#ffe4ec",
+    borderWidth: 1,
+    borderColor: "#ffb6c1",
+  },
+  placeholderStyle: {
+    color: "#cc6699",
+    fontSize: 16,
   },
 });
