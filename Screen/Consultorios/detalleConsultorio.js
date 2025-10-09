@@ -79,7 +79,7 @@ export default function DetalleConsultorio({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#cc3366" />
+        <ActivityIndicator size="large" color="#e38ea8" />
         <Text>Cargando consultorio...</Text>
       </View>
     );
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 20,
     fontWeight: "bold",
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   card: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 12,
     borderRadius: 25,
     alignItems: "center",
@@ -178,6 +178,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   deleteButton: {
-    backgroundColor: "#ff4d4d",
+    backgroundColor: "#d67693ff",
   },
 });

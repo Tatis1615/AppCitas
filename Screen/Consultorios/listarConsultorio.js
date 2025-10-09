@@ -41,8 +41,8 @@ export default function ListarConsultorios({ navigation }) {
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#cc3366" />
-        <Text style={{ marginTop: 10, color: "#cc3366" }}>Cargando consultorios...</Text>
+        <ActivityIndicator size="large" color="#e38ea8" />
+        <Text style={{ marginTop: 10, color: "#e38ea8 " }}>Cargando consultorios...</Text>
       </View>
     );
   }
@@ -97,11 +97,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 10,
     fontWeight: "bold",
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,

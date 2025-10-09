@@ -76,7 +76,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
     fetchData();
   }, []);
 
-  // 🔹 Obtener email del paciente
+  // Obtener email del paciente
   useEffect(() => {
     const getPacienteEmail = async () => {
       try {

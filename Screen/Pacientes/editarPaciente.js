@@ -148,17 +148,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff0f5", // fondo pastel
-    padding: 20,
+    padding: 30,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#ffe6f0",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 15,
     marginBottom: 20,
@@ -176,15 +176,15 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ffb6c1",
-    borderRadius: 10,
+    borderColor: "#e38ea8",
+    borderRadius: 15,
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 16,
     marginBottom: 12,
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",

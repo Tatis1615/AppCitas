@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff0f5", // Fondo pastel suave
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 35,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   input: {
@@ -146,11 +146,11 @@ const styles = StyleSheet.create({
     borderColor: "#ffb6c1",
     padding: 12,
     marginVertical: 8,
-    borderRadius: 10,
+    borderRadius: 15,
     fontSize: 16,
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",

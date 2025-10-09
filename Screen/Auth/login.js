@@ -67,7 +67,7 @@ export default function Login({ navigation }) {
       enableOnAndroid={true}
       extraScrollHeight={50} 
     >
-      <Text style={styles.title}>💖 Iniciar Sesión 💖</Text>
+      <Text style={styles.title}> Iniciar Sesión 🔬</Text>
 
       <TextInput
         style={styles.input}
@@ -123,11 +123,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 30,
     textAlign: "center",
-    color: "#cc3366",
+    color: "#e38ea8",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ff99bb",
+    borderColor: "#ffb6c1",
     backgroundColor: "#fff0f5",
     padding: 12,
     marginVertical: 8,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   button: {
-    backgroundColor: "#ff80aa",
+    backgroundColor: "#fba1b9ff",
     paddingVertical: 15,
     borderRadius: 25,
     marginVertical: 10,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   secondaryButton: {
-    backgroundColor: "#ff4d94",
+    backgroundColor: "#ec688fff",
   },
   buttonText: {
     color: "white",

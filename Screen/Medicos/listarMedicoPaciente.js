@@ -41,7 +41,7 @@ export default function ListarMedicosPaciente({ navigation }) {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#cc3366" />
+        <ActivityIndicator size="large" color="#e38ea8" />
         <Text>Cargando médicos...</Text>
       </View>
     );
@@ -88,11 +88,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 15,
     fontWeight: "bold",
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   button: {
-    backgroundColor: "#ff99cc",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,

@@ -58,7 +58,7 @@ const [userName, setUserName] = useState("");
           style={styles.card}
           onPress={() => navigation.navigate("Pacientes", { screen: "ListarPacientes" })}
         >
-          <Ionicons name="person-add-outline" size={40} color="#cc3366" />
+          <Ionicons name="person-add-outline" size={40} color="#e38ea8" />
           <Text style={styles.cardTitle}>Pacientes</Text>
           <Text style={styles.cardDesc}>Ver pacientes</Text>
         </TouchableOpacity>
@@ -68,7 +68,7 @@ const [userName, setUserName] = useState("");
           style={styles.card}
           onPress={() => navigation.navigate("Medicos", { screen: "ListarMedicos" })}
         >
-          <Ionicons name="medkit-outline" size={40} color="#cc3366" />
+          <Ionicons name="medkit-outline" size={40} color="#e38ea8" />
           <Text style={styles.cardTitle}>Médicos</Text>
           <Text style={styles.cardDesc}>Ver listado de médicos</Text>
         </TouchableOpacity>
@@ -78,7 +78,7 @@ const [userName, setUserName] = useState("");
           style={styles.card}
           onPress={() => navigation.navigate("Consultorios", { screen: "ListarConsultorios" })}
         >
-          <Ionicons name="business-outline" size={40} color="#cc3366" />
+          <Ionicons name="business-outline" size={40} color="#e38ea8" />
           <Text style={styles.cardTitle}>Consultorios</Text>
           <Text style={styles.cardDesc}>Gestión de consultorios</Text>
         </TouchableOpacity>
@@ -88,7 +88,7 @@ const [userName, setUserName] = useState("");
           style={styles.card}
           onPress={() => navigation.navigate("Especialidades", { screen: "ListarEspecialidades" })}
         >
-          <Ionicons name="business-outline" size={40} color="#cc3366" />
+          <Ionicons name="business-outline" size={40} color="#e38ea8" />
           <Text style={styles.cardTitle}>Especialidades</Text>
           <Text style={styles.cardDesc}>Gestión de especialidades</Text>
         </TouchableOpacity>
@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#cc3366",
+    marginBottom: 35,
+    color: "#e38ea8",
     textAlign: "center",
   },
   grid: {
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
-    color: "#333",
+    color: "#e38ea8",
   },
   cardDesc: {
     fontSize: 13,

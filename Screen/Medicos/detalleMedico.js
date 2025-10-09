@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   card: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 12,
     borderRadius: 25,
     alignItems: "center",
@@ -222,6 +222,6 @@ const styles = StyleSheet.create({
     color: "white",
   },
   deleteButton: {
-    backgroundColor: "#ff4d4d",
+    backgroundColor: "#d67693ff",
   },
 });

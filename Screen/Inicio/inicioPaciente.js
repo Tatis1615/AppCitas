@@ -175,7 +175,7 @@ export default function InicioPaciente({ navigation }) {
           style={styles.card}
           onPress={() => navigation.navigate("Especialidades", { screen: "ListarEspecialidadesPaciente" })}
         >
-          <Ionicons name="business-outline" size={40} color="#cc3366" />
+          <Ionicons name="business-outline" size={40} color="#e38ea8" />
           <Text style={styles.cardTitle}>Especialidades</Text>
           <Text style={styles.cardDesc}>Gestión de especialidades</Text>
         </TouchableOpacity>
@@ -184,7 +184,7 @@ export default function InicioPaciente({ navigation }) {
           style={styles.card}
           onPress={() => navigation.navigate("Medicos", { screen: "ListarMedicos" })}
         >
-          <Ionicons name="medkit-outline" size={40} color="#cc3366" />
+          <Ionicons name="medkit-outline" size={40} color="#e38ea8" />
           <Text style={styles.cardTitle}>Médicos</Text>
           <Text style={styles.cardDesc}>Ver médicos disponibles</Text>
         </TouchableOpacity>
@@ -194,19 +194,19 @@ export default function InicioPaciente({ navigation }) {
         <Text style={styles.sectionTitle}>Contáctanos</Text>
 
         <View style={styles.contactItem}>
-          <Ionicons name="call-outline" size={24} color="#cc3366" />
+          <Ionicons name="call-outline" size={24} color="#e38ea8" />
           <TouchableOpacity onPress={() => handleCall("+573165678901")}>
             <Text style={styles.contactText}>+57 316 567 8901</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.contactItem}>
-          <Ionicons name="location-outline" size={24} color="#cc3366" />
+          <Ionicons name="location-outline" size={24} color="#e38ea8" />
           <Text style={styles.contactText}>Calle 123 #45-67, Bogotá</Text>
         </View>
 
         <View style={styles.contactItem}>
-          <Ionicons name="globe-outline" size={24} color="#cc3366" />
+          <Ionicons name="globe-outline" size={24} color="#e38ea8" />
           <TouchableOpacity onPress={() => handleOpenWeb("https://vida-salud-example.com")}>
             <Text style={styles.contactText}>Visitar sitio web</Text>
           </TouchableOpacity>
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 14,
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
 

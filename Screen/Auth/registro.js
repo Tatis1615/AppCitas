@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-    color: "#cc3366",
+    color: "#dd5783ff",
   },
   subtitle: {
     fontSize: 20,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   button: {
-    backgroundColor: "#ff80aa",
+    backgroundColor: "#ff9cbdff",
     paddingVertical: 15,
     borderRadius: 25,
     marginVertical: 10,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   secondaryButton: {
-    backgroundColor: "#ff4d94",
+    backgroundColor: "#ff7eb2ff",
   },
   buttonText: {
     color: "white",

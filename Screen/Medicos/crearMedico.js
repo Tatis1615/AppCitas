@@ -184,13 +184,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff0f5", // Fondo pastel suave
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 35,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   input: {
