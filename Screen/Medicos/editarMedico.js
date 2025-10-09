@@ -19,6 +19,7 @@ export default function EditarMedico({ route, navigation }) {
   const [apellido_m, setApellido] = useState(medico.apellido_m);
   const [edad, setEdad] = useState(String(medico.edad));
   const [telefono, setTelefono] = useState(medico.telefono);
+  const [email, setEmail] = useState(medico.email);
   const [especialidades, setEspecialidades] = useState([]);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export default function EditarMedico({ route, navigation }) {
             apellido_m,
             edad,
             telefono,
+            email,
           }),
         }
       );
@@ -130,6 +132,13 @@ export default function EditarMedico({ route, navigation }) {
         <TextInput
           value={telefono}
           onChangeText={setTelefono}
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Email:</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
           style={styles.input}
         />
 

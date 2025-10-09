@@ -49,6 +49,8 @@ export default function Login({ navigation }) {
           navigation.navigate("Inicio");
         } else if (data.user && data.user.role === "paciente") {
           navigation.navigate("InicioPaciente");
+        } else if (data.user && data.user.role === "medico") {
+          navigation.navigate("InicioMedico");
         } else {
           alert("Rol no reconocido, consulta con el administrador.");
         }

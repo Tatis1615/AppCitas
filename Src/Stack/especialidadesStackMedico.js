@@ -1,17 +1,18 @@
+// EspecialidadesStack.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
 // Importa tus pantallas reales
-import ListarEspecialidades from "../../Screen/Especialidades/listarEspecialidadPaciente";
+import ListarEspecialidadesMedico from "../../Screen/Especialidades/listarEspecialidadMedico";
 
 const Stack = createStackNavigator();
 
-export default function EspecialidadesStack() {
+export default function EspecialidadesStackMedico() {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="ListarEspecialidades"
-        component={ListarEspecialidades}
+        component={ListarEspecialidadesMedico}
         options={{ title: "Listado de Especialidades" }}
       />
     </Stack.Navigator>

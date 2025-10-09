@@ -8,6 +8,7 @@ import Login from "./Screen/Auth/login";
 import Registro from "./Screen/Auth/registro";
 import Tabs from "./Src/Tabs";
 import TabsPaciente from "./Src/TabsPaciente";
+import TabsMedico from "./Src/TabsMedico";
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,11 @@ export default function App() {
         <Stack.Screen 
           name="InicioPaciente" 
           component={TabsPaciente} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="InicioMedico" 
+          component={TabsMedico} 
           options={{ headerShown: false }} 
         />
   

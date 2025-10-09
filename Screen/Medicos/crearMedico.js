@@ -12,6 +12,7 @@ export default function CrearMedico({ navigation }) {
   const [apellido_m, setApellido] = useState("");
   const [edad, setEdad] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     const fetchEspecialidades = async () => {
@@ -40,7 +41,7 @@ export default function CrearMedico({ navigation }) {
   }, []);
 
   const handleCrear = async () => {
-    if (!especialidad_id || !nombre_m || !apellido_m || !edad || !telefono) {
+    if (!especialidad_id || !nombre_m || !apellido_m || !edad || !telefono ||!email) {
       alert("⚠️ Por favor completa todos los campos");
       return;
     }
@@ -55,7 +56,7 @@ export default function CrearMedico({ navigation }) {
           "Authorization": `Bearer ${token}`,
           Accept: "application/json",
         },
-        body: JSON.stringify({ especialidad_id, nombre_m, apellido_m, edad, telefono }),
+        body: JSON.stringify({ especialidad_id, nombre_m, apellido_m, edad, telefono, email }),
       });
 
       const data = await response.json();
@@ -112,6 +113,12 @@ export default function CrearMedico({ navigation }) {
         placeholder="Teléfono"
         value={telefono}
         onChangeText={setTelefono}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
       />
 
       {/* Botón Crear */}

@@ -160,7 +160,7 @@ export default function ListarCitasPaciente({ navigation }) {
           disabled={!isPaciente}
           onPress={handleCrearCita}
         >
-          <Text style={styles.topButtonText}>Agregar citas</Text>
+          <Text style={styles.topButtonText}>Agregar nueva cita</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -175,7 +175,7 @@ export default function ListarCitasPaciente({ navigation }) {
             navigation.navigate("CrearCitaPaciente", { paciente_id });
           }}
         >
-          <Text style={styles.topButtonText}>Nuevo paciente</Text>
+          <Text style={styles.topButtonText}>Datos adicionales</Text>
         </TouchableOpacity>
       </View>
 

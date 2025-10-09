@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config"; // Importamos la URL base de la API
 
-export default function ListarConsultorios({ navigation }) {
-  const [consultorios, setConsultorios] = useState([]);
+export default function ListarPacientesMedico({ navigation }) {
+  const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Llamar al backend para traer pacientes
   useEffect(() => {
-    const fetchConsultorios = async () => {
+    const fetchPacientes = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        const response = await fetch(`${API_BASE_URL}/listarConsultorios`, {
+        const response = await fetch(`${API_BASE_URL}/listarPacientes`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -24,9 +25,9 @@ export default function ListarConsultorios({ navigation }) {
         const data = await response.json();
 
         if (response.ok) {
-          setConsultorios(data);
+          setPacientes(data); 
         } else {
-          console.log("Error al obtener consultorio:", data);
+          console.log("Error al obtener citas:", data);
         }
       } catch (error) {
         console.error("Error en fetchCitas:", error);
@@ -35,48 +36,39 @@ export default function ListarConsultorios({ navigation }) {
       }
     };
 
-    fetchConsultorios();
+    fetchPacientes();
   }, []);
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={styles.loader}>
         <ActivityIndicator size="large" color="#e38ea8" />
-        <Text style={{ marginTop: 10, color: "#e38ea8 " }}>Cargando consultorios...</Text>
+        <Text>Cargando pacientes...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lista de Consultorios</Text>
+      <Text style={styles.title}>Lista de Pacientes</Text>
 
       <FlatList
-        data={consultorios}
+        data={pacientes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("DetalleConsultorio", { id: item.id })}
+            onPress={() => navigation.navigate("DetallePacienteMedico", { id: item.id })}
           >
-            <Text style={styles.cardTitle}>Consultorio N° {item.numero}</Text>
-            <Text style={styles.cardSubtitle}>Ubicación: {item.ubicacion}</Text>
+            <Image source={{ uri: "https://i.pinimg.com/1200x/55/f4/4f/55f44f72c699b296c43ca80743dc3173.jpg" }} style={styles.avatar} />
+            <View style={styles.info}>
+              <Text style={styles.cardTitle}>{item.nombre}</Text>
+              <Text style={styles.cardSubtitle}>Documento: {item.documento}</Text>
+              <Text style={styles.cardSubtitle}>Telefono: {item.telefono}</Text>
+            </View>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={
-          <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
-            No tienes citas registradas.
-          </Text>
-        }
       />
-
-      {/* Botón Crear Consultorio */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("CrearConsultorio")}
-      >
-        <Text style={styles.buttonText}>+ Crear Consultorio</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -87,15 +79,14 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff0f5",
   },
-  loaderContainer: {
+  loader: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff0f5",
   },
   title: {
     fontSize: 22,
-    marginBottom: 10,
+    marginBottom: 15,
     fontWeight: "bold",
     color: "#e38ea8",
     textAlign: "center",
@@ -106,8 +97,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 25,
     alignItems: "center",
+    marginTop: 20,
     marginBottom: 20,
-    marginTop: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
     color: "white",
@@ -115,25 +110,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: {
+    flexDirection: "row",
+    alignItems: "center",
     padding: 15,
-    marginVertical: 6,
+    marginVertical: 8,
     backgroundColor: "#ffe6f0",
-    borderRadius: 12,
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: "#ffb6c1",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 2,
+  },
+  avatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 15,
+    borderWidth: 2,
+    borderColor: "#ffb6c1",
+  },
+  info: {
+    flex: 1,
   },
   cardTitle: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
     color: "#333",
   },
   cardSubtitle: {
     color: "#555",
-    marginTop: 3,
+    marginTop: 2,
   },
 });

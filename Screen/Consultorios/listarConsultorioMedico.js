@@ -1,71 +1,81 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Import de tu URL base
+import API_BASE_URL from "../../Src/Config"; // Importamos la URL base de la API
 
-export default function ListarEspecialidadesPaciente({ navigation }) {
-  const [especialidades, setEspecialidades] = useState([]);
+export default function ListarConsultoriosMedico({ navigation }) {
+  const [consultorios, setConsultorios] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEspecialidades = async () => {
+    const fetchConsultorios = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        const response = await fetch(`${API_BASE_URL}/listarEspecialidades`, {
+        const response = await fetch(`${API_BASE_URL}/listarConsultorios`, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-      });
+        });
+
         const data = await response.json();
 
         if (response.ok) {
-          setEspecialidades(data);
+          setConsultorios(data);
         } else {
-          console.log("Error al obtener especialidades:", data);
+          console.log("Error al obtener consultorio:", data);
         }
       } catch (error) {
-        console.error("Error en fetchEspecialidades:", error);
+        console.error("Error en fetch:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEspecialidades();
+    fetchConsultorios();
   }, []);
 
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#e38ea8" />
-        <Text style={{ marginTop: 10, color: "#e38ea8" }}>Cargando especialidades...</Text>
+        <Text style={{ marginTop: 10, color: "#e38ea8 " }}>Cargando consultorios...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lista de Especialidades</Text>
+      <Text style={styles.title}>Lista de Consultorios</Text>
 
       <FlatList
-        data={especialidades}
+        data={consultorios}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
           >
-            <Text style={styles.cardTitle}>{item.nombre_e}</Text>
+            <Text style={styles.cardTitle}>Consultorio N° {item.numero}</Text>
+            <Text style={styles.cardSubtitle}>Ubicación: {item.ubicacion}</Text>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
           <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
-            No tienes citas registradas.
+            No tienes consultorios registrados.
           </Text>
         }
       />
+
+      {/* Botón Crear Consultorio */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("CrearConsultorio")}
+      >
+        <Text style={styles.buttonText}>+ Crear Consultorio</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -126,4 +136,3 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 });
-

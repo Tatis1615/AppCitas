@@ -145,6 +145,7 @@ export default function Registro({ navigation }) {
         data={[
           { label: "Administrador", value: "admin" },
           { label: "Paciente", value: "paciente" },
+          { label: "Medico", value: "medico" },
         ]}
         labelField="label"
         valueField="value"

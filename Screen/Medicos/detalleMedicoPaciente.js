@@ -100,6 +100,9 @@ useEffect(() => {
 
         <Text style={styles.label}>Teléfono:</Text>
         <Text style={styles.value}>{medico.telefono}</Text>
+
+        <Text style={styles.label}>Email:</Text>
+        <Text style={styles.value}>{medico.email}</Text>
       </View>
 
       {/* Botón Volver */}

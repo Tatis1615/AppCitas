@@ -56,25 +56,33 @@ export default function Perfil({ navigation }) {
 
           // Si es paciente, obtener sus datos
           if (userData.user.role === "paciente") {
-            const resPaciente = await fetch(`${API_BASE_URL}/pacientes/${userData.user.id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-              },
-            });
+            const resPaciente = await fetch(
+              `${API_BASE_URL}/pacientePorEmail/${encodeURIComponent(userData.user.email)}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              }
+            );
+
             const pacienteInfo = await resPaciente.json();
 
-            if (resPaciente.ok) {
+            if (resPaciente.ok && pacienteInfo.success) {
+              const datos = pacienteInfo.data;
               setPacienteData({
-                nombre: pacienteInfo.nombre || "",
-                apellido: pacienteInfo.apellido || "",
-                documento: pacienteInfo.documento || "",
-                telefono: pacienteInfo.telefono || "",
-                direccion: pacienteInfo.direccion || "",
-                fecha_nacimiento: pacienteInfo.fecha_nacimiento || "",
+                nombre: datos.nombre || "",
+                apellido: datos.apellido || "",
+                documento: datos.documento || "",
+                telefono: datos.telefono || "",
+                direccion: datos.direccion || "",
+                fecha_nacimiento: datos.fecha_nacimiento || "",
               });
+            } else {
+              console.warn("Paciente no encontrado:", pacienteInfo.message);
             }
           }
+
         }
       } catch (error) {
         console.error("❌ Error cargando perfil:", error);
