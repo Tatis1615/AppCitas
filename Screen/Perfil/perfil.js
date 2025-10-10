@@ -16,6 +16,7 @@ import { Image } from "react-native";
 
 export default function Perfil({ navigation }) {
   const [user, setUser] = useState(null);
+  const [paciente, setPaciente] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
 
@@ -34,13 +35,23 @@ export default function Perfil({ navigation }) {
     fecha_nacimiento: "",
   });
 
+  // Campos del médico
+  const [medicoData, setMedicoData] = useState({
+    nombre_m: "",
+    apellido_m: "",
+    edad: "",
+    telefono: "",
+    email: "",
+    especialidad_id: "",
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token) return;
 
-        // Obtener usuario
+        // Obtener usuario logueado
         const resUser = await fetch(`${API_BASE_URL}/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,7 +65,7 @@ export default function Perfil({ navigation }) {
           setName(userData.user.name);
           setEmail(userData.user.email);
 
-          // Si es paciente, obtener sus datos
+          // Si es paciente, cargar sus datos
           if (userData.user.role === "paciente") {
             const resPaciente = await fetch(
               `${API_BASE_URL}/pacientePorEmail/${encodeURIComponent(userData.user.email)}`,
@@ -78,11 +89,35 @@ export default function Perfil({ navigation }) {
                 direccion: datos.direccion || "",
                 fecha_nacimiento: datos.fecha_nacimiento || "",
               });
-            } else {
-              console.warn("Paciente no encontrado:", pacienteInfo.message);
             }
           }
 
+          // Si es médico, cargar sus datos
+          if (userData.user.role === "medico") {
+            const resMedico = await fetch(
+              `${API_BASE_URL}/medicoPorEmail/${encodeURIComponent(userData.user.email)}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              }
+            );
+
+            const medicoInfo = await resMedico.json();
+
+            if (resMedico.ok && medicoInfo.success) {
+              const datos = medicoInfo.data;
+              setMedicoData({
+                nombre_m: datos.nombre_m || "",
+                apellido_m: datos.apellido_m || "",
+                edad: datos.edad || "",
+                telefono: datos.telefono || "",
+                email: datos.email || "",
+                especialidad_id: datos.especialidad_id?.toString() || "",
+              });
+            }
+          }
         }
       } catch (error) {
         console.error("❌ Error cargando perfil:", error);
@@ -98,7 +133,12 @@ export default function Perfil({ navigation }) {
     try {
       const token = await AsyncStorage.getItem("token");
 
-      // Actualizar tabla users
+      if (!user) {
+        Alert.alert("Error", "No hay información del usuario cargada");
+        return;
+      }
+
+      // ✅ Actualizar tabla users
       await fetch(`${API_BASE_URL}/editarUsuario/${user.id}`, {
         method: "PUT",
         headers: {
@@ -108,16 +148,34 @@ export default function Perfil({ navigation }) {
         body: JSON.stringify({ name, email, password }),
       });
 
-      // Actualizar tabla pacientes (solo si es paciente)
+      // ✅ Si es PACIENTE, actualizar por email
       if (user.role === "paciente") {
-        await fetch(`${API_BASE_URL}/actualizarPaciente/${user.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(pacienteData),
-        });
+        await fetch(
+          `${API_BASE_URL}/actualizarPacienteEmail/${encodeURIComponent(user.email)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(pacienteData),
+          }
+        );
+      }
+
+      // ✅ Si es MÉDICO, actualizar por email
+      if (user.role === "medico") {
+        await fetch(
+          `${API_BASE_URL}/actualizarMedicoEmail/${encodeURIComponent(user.email)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(medicoData),
+          }
+        );
       }
 
       Alert.alert("✅ Perfil actualizado con éxito");
@@ -127,6 +185,7 @@ export default function Perfil({ navigation }) {
       Alert.alert("❌ No se pudo guardar la información");
     }
   };
+
 
   const handleLogout = async () => {
     try {
@@ -227,6 +286,34 @@ export default function Perfil({ navigation }) {
             </>
           )}
 
+          {/* ===================== DATOS MÉDICO ===================== */}
+          {user.role === "medico" && (
+            <>
+              <Text style={styles.sectionTitle}>Datos del Médico</Text>
+
+              {[
+                { label: "Nombre", key: "nombre_m" },
+                { label: "Apellido", key: "apellido_m" },
+                { label: "Edad", key: "edad" },
+                { label: "Teléfono", key: "telefono" },
+                { label: "Correo", key: "email" },
+                { label: "Especialidad ID", key: "especialidad_id" },
+              ].map((field) => (
+                <View key={field.key}>
+                  <Text style={styles.label}>{field.label}</Text>
+                  <TextInput
+                    editable={editing}
+                    style={[styles.input, !editing && styles.readOnly]}
+                    value={medicoData[field.key]}
+                    onChangeText={(v) =>
+                      setMedicoData({ ...medicoData, [field.key]: v })
+                    }
+                  />
+                </View>
+              ))}
+            </>
+          )}
+
           {/* ===================== BOTONES ===================== */}
           {editing ? (
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -257,11 +344,7 @@ export default function Perfil({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#ffeef6" },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { color: "#e38ea8", marginTop: 10 },
   panel: {
     backgroundColor: "#fff",
@@ -290,10 +373,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#444",
   },
-  readOnly: {
-    backgroundColor: "#f9f9f9",
-    color: "#666",
-  },
+  readOnly: { backgroundColor: "#f9f9f9", color: "#666" },
   editButton: {
     flexDirection: "row",
     justifyContent: "center",
@@ -321,7 +401,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 20,
   },
-  logoutText: { color: "#fff", fontSize: 16, fontWeight: "bold", marginLeft: 8 },
+  logoutText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
   errorText: { textAlign: "center", color: "#d87093", fontSize: 16 },
   profileImage: {
     width: 110,
