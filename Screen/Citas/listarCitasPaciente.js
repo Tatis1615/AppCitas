@@ -162,21 +162,19 @@ export default function ListarCitasPaciente({ navigation }) {
         >
           <Text style={styles.topButtonText}>Agregar nueva cita</Text>
         </TouchableOpacity>
+        
 
-        <TouchableOpacity
-          style={[
-            styles.topButton,
-            { backgroundColor: isPaciente ? "#aaa" : "#f58eb0ff" },
-          ]}
-          disabled={isPaciente}
-          onPress={async () => {
-            const paciente_id = await AsyncStorage.getItem("paciente_id");
-            console.log("🧠 paciente_id enviado:", paciente_id);
-            navigation.navigate("CrearCitaPaciente", { paciente_id });
-          }}
-        >
-          <Text style={styles.topButtonText}>Datos adicionales</Text>
-        </TouchableOpacity>
+
+        {!isPaciente && (
+          <TouchableOpacity
+            style={[styles.topButton, { backgroundColor: "#f58eb0ff" }]}
+            onPress={() => navigation.navigate("CrearPacienteCita")}
+          >
+            <Text style={styles.topButtonText}>Datos adicionales</Text>
+          </TouchableOpacity>
+        )}
+
+
       </View>
 
       {citas.length === 0 ? (
