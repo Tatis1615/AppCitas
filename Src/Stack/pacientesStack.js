@@ -1,4 +1,3 @@
-// PacientesStack.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import ListarPacientes from "../../Screen/Pacientes/listarPaciente";

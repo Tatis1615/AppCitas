@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Import de tu URL base
+import API_BASE_URL from "../../Src/Config"; 
 
 export default function ListarEspecialidadesMedico({ navigation }) {
   const [especialidades, setEspecialidades] = useState([]);

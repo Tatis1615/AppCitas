@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -52,7 +45,7 @@ useEffect(() => {
 
     } catch (error) {
       console.error(error);
-      alert("❌ No se pudo cargar el médico");
+      alert("No se pudo cargar el médico");
     } finally {
       setLoading(false);
     }
@@ -86,15 +79,15 @@ useEffect(() => {
               const data = await response.json();
 
               if (response.ok) {
-                Alert.alert("✅ Medico eliminado correctamente");
+                Alert.alert("Medico eliminado correctamente");
                 navigation.navigate("ListarMedicos"); 
               } else {
                 console.error("Error del servidor:", data);
-                Alert.alert("❌ Error", data.message || "No se pudo eliminar el medico");
+                Alert.alert("Error", data.message || "No se pudo eliminar el medico");
               }
             } catch (error) {
               console.error("Error eliminando medico:", error);
-              Alert.alert("❌ Error de conexión con el servidor");
+              Alert.alert("Error de conexión con el servidor");
             }
           },
         },
@@ -115,7 +108,7 @@ useEffect(() => {
   if (!medico) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: "red" }}>⚠️ No se encontró información</Text>
+        <Text style={{ color: "red" }}>No se encontró información</Text>
       </View>
     );
   }
@@ -124,13 +117,13 @@ useEffect(() => {
     <View style={styles.container}>
       <Text style={styles.title}>Detalles del Médico</Text>
 
+
       <View style={styles.card}>
         <Text style={styles.label}>Especialidad:</Text>
         <Text style={styles.value}>
           {especialidadNombre || "Cargando..."}
         </Text>
 
-        
         <Text style={styles.label}>Nombre:</Text>
         <Text style={styles.value}>{medico.nombre_m}</Text>
 
@@ -147,13 +140,14 @@ useEffect(() => {
         <Text style={styles.value}>{medico.email}</Text>
       </View>
 
-      {/* Botón Editar */}
+
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("EditarMedico", { medico })}
       >
         <Text style={styles.buttonText}>Editar</Text>
       </TouchableOpacity>
+
 
       <TouchableOpacity
         style={[styles.button, styles.deleteButton]}
@@ -162,7 +156,7 @@ useEffect(() => {
         <Text style={[styles.buttonText, { color: "white" }]}>Eliminar</Text>
       </TouchableOpacity>
 
-      {/* Botón Volver */}
+
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
         onPress={() => navigation.goBack()}
@@ -176,7 +170,7 @@ useEffect(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff0f5", // fondo pastel suave
+    backgroundColor: "#fff0f5",
     padding: 20,
   },
   title: {

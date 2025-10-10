@@ -1,27 +1,16 @@
 import React, { useState } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert,
-  ScrollView,
-  Platform
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
 
 export default function Registro({ navigation }) {
-  // Campos básicos
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  // Paciente
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [documento, setDocumento] = useState("");
@@ -31,7 +20,6 @@ export default function Registro({ navigation }) {
   const [direccion, setDireccion] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Médico
   const [nombreM, setNombreM] = useState("");
   const [apellidoM, setApellidoM] = useState("");
   const [edad, setEdad] = useState("");
@@ -67,9 +55,8 @@ export default function Registro({ navigation }) {
       const token = data.token;
       const userId = data.user?.id;
 
-      // ===================== PACIENTE =====================
+
       if (role === "paciente") {
-        // Solo crear perfil si llenó al menos 1 campo adicional
         const filledFields = [nombre, apellido, documento, telefono, emailPaciente, direccion, fecha_nacimiento]
           .filter((v) => v.trim() !== "");
 
@@ -96,7 +83,6 @@ export default function Registro({ navigation }) {
 
             const dataPaciente = await responsePaciente.json();
 
-            // Si ya existe o falla, solo muestra aviso pero NO detiene el flujo
             if (!responsePaciente.ok) {
               console.log("Paciente ya existente o error:", dataPaciente);
             }
@@ -106,9 +92,7 @@ export default function Registro({ navigation }) {
         }
       }
 
-      // ===================== MÉDICO =====================
       if (role === "medico") {
-        // Solo crear perfil si llenó al menos 1 campo adicional
         const filledFields = [nombreM, apellidoM, edad, telefonoM, emailMedico, especialidadId]
           .filter((v) => v.trim() !== "");
 
@@ -134,7 +118,6 @@ export default function Registro({ navigation }) {
 
             const dataMedico = await responseMedico.json();
 
-            // Si ya existe o falla, no detiene el flujo
             if (!responseMedico.ok) {
               console.log("Médico ya existente o error:", dataMedico);
             }
@@ -143,8 +126,6 @@ export default function Registro({ navigation }) {
           }
         }
       }
-
-      // ✅ Mensaje final — siempre se muestra
       Alert.alert("Éxito", "Usuario registrado correctamente 💖");
       navigation.navigate("Login");
 
@@ -153,7 +134,6 @@ export default function Registro({ navigation }) {
       Alert.alert("Error", "Hubo un problema con la conexión al servidor");
     }
   };
-
 
   const onChangeFecha = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -167,7 +147,6 @@ export default function Registro({ navigation }) {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>✨ Registro ✨</Text>
 
-      {/* Campos básicos */}
       <TextInput
         style={styles.input}
         placeholder="Nombre de usuario"
@@ -207,7 +186,6 @@ export default function Registro({ navigation }) {
         placeholderStyle={styles.placeholderStyle}
       />
 
-      {/* Paciente */}
       {role === "paciente" && (
         <View style={styles.extraContainer}>
           <Text style={styles.subtitle}>🩺 Datos del Paciente</Text>
@@ -235,7 +213,6 @@ export default function Registro({ navigation }) {
         </View>
       )}
 
-      {/* Médico */}
       {role === "medico" && (
         <View style={styles.extraContainer}>
           <Text style={styles.subtitle}>🩺 Datos del Médico</Text>

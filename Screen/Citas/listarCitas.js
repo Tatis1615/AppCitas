@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -59,13 +60,24 @@ export default function ListarCitas({ navigation }) {
             style={styles.card}
             onPress={() => navigation.navigate("DetalleCita", { id: item.id })}
           >
-            <Text style={styles.cardTitle}>{item.fecha_hora}</Text>
-            <Text style={styles.cardSubtitle}>Estado: {item.estado}</Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="calendar-outline" size={28} color="#e38ea8" />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>{item.fecha_hora}</Text>
+              <Text style={styles.cardSubtitle}>
+                <Ionicons name="checkmark-circle-outline" size={14} color="#999" />{" "}
+                Estado: <Text style={styles.estado}>{item.estado}</Text>
+              </Text>
+            </View>
+
+            <Ionicons name="chevron-forward-outline" size={22} color="#ccc" />
           </TouchableOpacity>
         )}
       />
 
-      {/* Botón Crear Paciente */}
+
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("CrearCita")}
@@ -103,19 +115,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: {
-    padding: 15,
-    marginVertical: 5,
-    backgroundColor: "#ffe6f0",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ffb6c1",
-  },
-  cardTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#333",
-  },
-  cardSubtitle: {
-    color: "#555",
-  },
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#ffe6f1ff",
+  padding: 15,
+  marginVertical: 8,
+  marginHorizontal: 2,
+  borderRadius: 18,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+},
+
+iconContainer: {
+  borderRadius: 50,
+  padding: 8,
+  marginRight: 12,
+},
+
+cardTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#333",
+  marginBottom: 4,
+},
+
+cardSubtitle: {
+  fontSize: 14,
+  color: "#555",
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+estado: {
+  fontWeight: "600",
+  color: "#e38ea8",
+},
+
 });

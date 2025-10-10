@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"; // 👈 importación
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -17,7 +17,7 @@ export default function CrearPaciente({ route, navigation }) {
 
   const handleCrear = async () => {
     if (!nombre || !apellido || !documento || !telefono || !email || !fecha_nacimiento || !direccion) {
-      alert("⚠️ Por favor completa todos los campos");
+      alert(" Por favor completa todos los campos");
       return;
     }
 
@@ -36,10 +36,10 @@ export default function CrearPaciente({ route, navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("✅ Paciente creado correctamente");
+        alert("Paciente creado correctamente");
         navigation.navigate("ListarPacientes");
       } else {
-        alert("❌ " + (data.message || "No se pudo crear el paciente"));
+        alert((data.message || "No se pudo crear el paciente"));
       }
     } catch (error) {
       console.error("Error en crear paciente:", error);
@@ -127,7 +127,7 @@ export default function CrearPaciente({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff0f5", // Fondo pastel suave
+    backgroundColor: "#fff0f5", 
     justifyContent: "center",
     alignItems: "center",
     padding: 35,

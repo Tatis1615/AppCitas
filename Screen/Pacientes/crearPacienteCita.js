@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Platform,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
@@ -72,7 +64,7 @@ export default function CrearPacienteCita({ navigation }) {
       !fecha_nacimiento ||
       !direccion
     ) {
-      Alert.alert("⚠️ Falta información", "Por favor completa todos los campos");
+      Alert.alert("Falta información", "Por favor completa todos los campos");
       return;
     }
 
@@ -213,7 +205,7 @@ export default function CrearPacienteCita({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffeef6", // 🎀 Fondo pastel rosado
+    backgroundColor: "#ffeef6", 
     justifyContent: "center",
     padding: 20,
   },

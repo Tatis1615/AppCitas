@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Platform,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -38,13 +30,13 @@ export default function EditarMedico({ route, navigation }) {
         const data = await response.json();
 
         if (response.ok) {
-          setEspecialidades(data); // 👈 Guardar especialidades en el estado
+          setEspecialidades(data);
         } else {
-          console.log("⚠️ Error cargando especialidades:", data);
+          console.log("Error cargando especialidades:", data);
           alert("No se pudieron cargar las especialidades");
         }
       } catch (error) {
-        console.error("⚡ Error de red:", error);
+        console.error("Error de red:", error);
         alert("Error al conectar con el servidor");
       }
     };
@@ -78,25 +70,27 @@ export default function EditarMedico({ route, navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("✅ Medico actualizado con éxito");
+        alert("Medico actualizado con éxito");
         navigation.navigate("ListarMedicos");
       } else {
-        console.log("⚠️ Backend respondió con error:", data);
-        alert("❌ " + (data.message || "Error al actualizar el medico"));
+        console.log("Backend respondió con error:", data);
+        alert((data.message || "Error al actualizar el medico"));
       }
     } catch (error) {
-      console.error("⚡ Error de red:", error);
-      alert("⚠️ Error de conexión con el servidor");
+      console.error("Error de red:", error);
+      alert("Error de conexión con el servidor");
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Editar Médico</Text>
 
-
-
-         
+      <View style={styles.card}>
         <Text style={styles.label}>Especialidad:</Text>
         <SelectInput
           data={especialidades.map((esp) => ({ key: esp.id, label: esp.nombre_e }))}
@@ -141,7 +135,7 @@ export default function EditarMedico({ route, navigation }) {
           onChangeText={setEmail}
           style={styles.input}
         />
-
+      </View>
 
       <TouchableOpacity style={styles.button} onPress={handleGuardar}>
         <Text style={styles.buttonText}>Guardar</Text>
@@ -165,7 +159,7 @@ export default function EditarMedico({ route, navigation }) {
         cancelText="Cancelar"
   
         optionContainerStyle={{
-          backgroundColor: "#fff0f5", // pastel rosa muy claro
+          backgroundColor: "#fff0f5", 
           borderRadius: 20,
           padding: 10,
         }}
@@ -175,7 +169,7 @@ export default function EditarMedico({ route, navigation }) {
           paddingVertical: 10,
         }}
         cancelStyle={{
-          backgroundColor: "#ffe4e1", // rosa pastel
+          backgroundColor: "#ffe4e1",
           borderRadius: 20,
           marginTop: 10,
         }}
@@ -203,11 +197,9 @@ export default function EditarMedico({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: "#fff0f5",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    padding: 30,
   },
   title: {
     fontSize: 22,
@@ -217,24 +209,31 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   input: {
-    width: "100%",
-    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ffb6c1",
-    padding: 14,
+    borderColor: "#e38ea8",
     borderRadius: 15,
-    marginVertical: 15,
-    justifyContent: "center",
+    padding: 10,
+    backgroundColor: "#fff",
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
-
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",
-    marginTop: 15,
-    width: "100%",
+    marginBottom: 12,
   },
   secondaryButton: {
     backgroundColor: "white",
@@ -250,16 +249,16 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ffb6c1",
-    padding: 14,
+    borderColor: "#e38ea8",
+    padding: 12,
     borderRadius: 15,
-    marginVertical: 8,
+    marginVertical: 1,
     justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3, // sombra en Android
+    elevation: 3, 
   },
   label: {
     width: "100%",

@@ -1,7 +1,6 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// Importa tus pantallas reales
 import ListarEspecialidades from "../../Screen/Especialidades/listarEspecialidadPaciente";
 
 const Stack = createStackNavigator();

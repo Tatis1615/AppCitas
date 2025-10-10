@@ -1,8 +1,6 @@
-// EspecialidadesStack.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// Importa tus pantallas reales
 import ListarEspecialidadesMedico from "../../Screen/Especialidades/listarEspecialidadMedico";
 
 const Stack = createStackNavigator();

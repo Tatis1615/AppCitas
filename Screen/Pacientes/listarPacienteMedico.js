@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Importamos la URL base de la API
+import API_BASE_URL from "../../Src/Config"; 
 
 export default function ListarPacientesMedico({ navigation }) {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Llamar al backend para traer pacientes
+
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
@@ -27,10 +27,10 @@ export default function ListarPacientesMedico({ navigation }) {
         if (response.ok) {
           setPacientes(data); 
         } else {
-          console.log("Error al obtener citas:", data);
+          console.log("Error al obtener pacientes:", data);
         }
       } catch (error) {
-        console.error("Error en fetchCitas:", error);
+        console.error("Error en fetch:", error);
       } finally {
         setLoading(false);
       }

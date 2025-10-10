@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -16,33 +8,33 @@ export default function EditarConsultorio({ route, navigation }) {
   const [numero, setNumero] = useState(consultorio.numero);
   const [ubicacion, setUbicacion] = useState(consultorio.ubicacion);
 
-const handleGuardar = async () => {
-  try {
-    const token = await AsyncStorage.getItem("token");
-    const response = await fetch(`${API_BASE_URL}/actualizarConsultorio/${consultorio.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ numero, ubicacion }),
-    });
+  const handleGuardar = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/actualizarConsultorio/${consultorio.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ numero, ubicacion }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      alert("✅ Consultorio actualizado con éxito");
-      navigation.navigate("ListarConsultorios");
-    } else {
-      console.log("⚠️ Backend respondió con error:", data);
-      alert("❌ Error al actualizar el consultorio");
+      if (response.ok) {
+        alert("Consultorio actualizado con éxito");
+        navigation.navigate("ListarConsultorios");
+      } else {
+        console.log("Backend respondió con error:", data);
+        alert("Error al actualizar el consultorio");
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error de conexión con el servidor");
     }
-  } catch (error) {
-    console.error("⚡ Error de red:", error);
-    alert("⚠️ Error de conexión con el servidor");
-  }
-};
+  };
 
 
   return (
@@ -99,7 +91,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#ffe6f0",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 15,
     marginBottom: 20,
@@ -117,15 +109,15 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ffb6c1",
-    borderRadius: 10,
+    borderColor: "#e38ea8",
+    borderRadius: 15,
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 16,
     marginBottom: 12,
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",

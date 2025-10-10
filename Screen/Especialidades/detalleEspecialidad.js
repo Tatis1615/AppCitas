@@ -8,7 +8,6 @@ export default function DetalleEspecialidad({ route, navigation }) {
   const [ especialidad, setEspecialidad ] = useState(null);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     const fetchEspecialidad = async () => {
       try {
@@ -28,7 +27,7 @@ export default function DetalleEspecialidad({ route, navigation }) {
         setEspecialidad(data); 
       } catch (error) {
         console.error(error);
-        alert("❌ No se pudo cargar la especialidad");
+        alert("No se pudo cargar la especialidad");
       } finally {
         setLoading(false);
       }
@@ -61,15 +60,15 @@ export default function DetalleEspecialidad({ route, navigation }) {
               const data = await response.json();
 
               if (response.ok) {
-                Alert.alert("✅ Especialidad eliminado correctamente");
+                Alert.alert("Especialidad eliminado correctamente");
                 navigation.navigate("ListarEspecialidades"); 
               } else {
                 console.error("Error del servidor:", data);
-                Alert.alert("❌ Error", data.message || "No se pudo eliminar la especialidad");
+                Alert.alert("Error", data.message || "No se pudo eliminar la especialidad");
               }
             } catch (error) {
               console.error("Error eliminando especialidad:", error);
-              Alert.alert("❌ Error de conexión con el servidor");
+              Alert.alert("Error de conexión con el servidor");
             }
           },
         },
@@ -88,7 +87,7 @@ export default function DetalleEspecialidad({ route, navigation }) {
   if (!especialidad) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: "red" }}>⚠️ No se encontró información del consultorio</Text>
+        <Text style={{ color: "red" }}> No se encontró información del consultorio</Text>
       </View>
     );
   }
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff0f5", // Fondo pastel rosado
+    backgroundColor: "#fff0f5", 
   },
   title: {
     fontSize: 22,

@@ -1,25 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Platform,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Alert } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import API_BASE_URL from "../../Src/Config";
 
 export default function ListarCitasPaciente({ navigation }) {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
   const [isPaciente, setIsPaciente] = useState(null);
   const [pacienteEmail, setPacienteEmail] = useState(null);
   const [pacienteId, setPacienteId] = useState(null);
@@ -105,14 +92,6 @@ export default function ListarCitasPaciente({ navigation }) {
     init();
   }, []);
 
-  const handleDateChange = (event, date) => {
-    setShowDatePicker(false);
-    if (date) {
-      const isoDate = date.toISOString().split("T")[0];
-      setSelectedDate(isoDate);
-    }
-  };
-
   const handleCrearCita = async () => {
     if (isPaciente === null) {
       Alert.alert("Espere", "Comprobando registro de paciente, inténtalo en un momento.");
@@ -150,7 +129,6 @@ export default function ListarCitasPaciente({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Lista de mis citas</Text>
 
-      {/* Botones arriba */}
       <View style={styles.topButtons}>
         <TouchableOpacity
           style={[
@@ -164,7 +142,6 @@ export default function ListarCitasPaciente({ navigation }) {
         </TouchableOpacity>
         
 
-
         {!isPaciente && (
           <TouchableOpacity
             style={[styles.topButton, { backgroundColor: "#f58eb0ff" }]}
@@ -173,8 +150,6 @@ export default function ListarCitasPaciente({ navigation }) {
             <Text style={styles.topButtonText}>Datos adicionales</Text>
           </TouchableOpacity>
         )}
-
-
       </View>
 
       {citas.length === 0 ? (
@@ -228,7 +203,6 @@ export default function ListarCitasPaciente({ navigation }) {
       )}
     </View>
   );
-
 }
 
 const styles = StyleSheet.create({ 
@@ -241,7 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 22, 
     marginBottom: 10, 
     fontWeight: "bold", 
-    color: "#cc3366", 
+    color: "#e38ea8", 
     textAlign: "center", 
   }, 
   button: { 
@@ -324,5 +298,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
   },
-
 });

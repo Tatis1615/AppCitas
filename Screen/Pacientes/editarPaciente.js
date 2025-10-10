@@ -14,7 +14,6 @@ export default function EditarPaciente({ route, navigation }) {
   const [fecha_nacimiento, setFecha_nacimiento] = useState(paciente.fecha_nacimiento);
   const [direccion, setDireccion] = useState(paciente.direccion);
 
-  // estado para abrir/cerrar el picker
   const [showDatePicker, setShowDatePicker] = useState(false);
 
 
@@ -34,28 +33,25 @@ export default function EditarPaciente({ route, navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("✅ Paciente actualizado con éxito");
+        alert("Paciente actualizado con éxito");
         navigation.navigate("ListarPacientes");
       } else {
-        console.log("⚠️ Backend respondió con error:", data);
-        alert("❌ Error al actualizar el paciente");
+        console.log("Backend respondió con error:", data);
+        alert("Error al actualizar el paciente");
       }
     } catch (error) {
-      console.error("⚡ Error de red:", error);
-      alert("⚠️ Error de conexión con el servidor");
+      console.error("Error de red:", error);
+      alert("Error de conexión con el servidor");
     }
   };
 
-  // 📅 Manejar selección de fecha
   const onChangeFecha = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      const fechaFormateada = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      const fechaFormateada = selectedDate.toISOString().split("T")[0];
       setFecha_nacimiento(fechaFormateada);
     }
   };
-
-
 
   return (
     <ScrollView 
@@ -103,7 +99,6 @@ export default function EditarPaciente({ route, navigation }) {
           placeholder="Email"
         />
         <Text style={styles.label}>Fecha de nacimiento:</Text>
-         {/* 📅 Campo de fecha */}
         <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
           <Text style={{ color: fecha_nacimiento ? "#000" : "#707070ff" }}>
             {fecha_nacimiento || "Selecciona fecha de nacimiento"}
@@ -116,7 +111,7 @@ export default function EditarPaciente({ route, navigation }) {
             mode="date"
             display={Platform.OS === "ios" ? "spinner" : "default"}
             onChange={onChangeFecha}
-            maximumDate={new Date()} // no permitir fechas futuras
+            maximumDate={new Date()} 
           />
         )}
         <Text style={styles.label}>Dirección:</Text>
@@ -126,10 +121,8 @@ export default function EditarPaciente({ route, navigation }) {
           style={styles.input}
           placeholder="Direccion"
         />
-        
       </View>
 
-      {/* Botón Guardar */}
       <TouchableOpacity style={styles.button} onPress={handleGuardar}>
         <Text style={styles.buttonText}>Guardar</Text>
       </TouchableOpacity>
@@ -147,7 +140,7 @@ export default function EditarPaciente({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff0f5", // fondo pastel
+    backgroundColor: "#fff0f5",
     padding: 30,
   },
   title: {

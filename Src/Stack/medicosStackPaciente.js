@@ -1,8 +1,6 @@
-// MedicosStack.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// Importa tus pantallas reales
 import ListarMedicosPaciente from "../../Screen/Medicos/listarMedicoPaciente";
 import DetalleMedicoPaciente from "../../Screen/Medicos/detalleMedicoPaciente";
 

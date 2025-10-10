@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -36,7 +29,6 @@ export default function DetalleCita({ route, navigation }) {
         const data = await response.json();
         setCita(data);
 
-        // Traer nombre del paciente
         if (data.paciente_id) {
           const resPaciente = await fetch(
             `${API_BASE_URL}/pacientes/${data.paciente_id}`,
@@ -53,7 +45,6 @@ export default function DetalleCita({ route, navigation }) {
           }
         }
 
-        // Traer nombre del médico
         if (data.medico_id) {
           const resMedico = await fetch(
             `${API_BASE_URL}/medicos/${data.medico_id}`,
@@ -70,7 +61,6 @@ export default function DetalleCita({ route, navigation }) {
           }
         }
 
-        // Traer número del consultorio
         if (data.consultorio_id) {
           const resConsultorio = await fetch(
             `${API_BASE_URL}/consultorios/${data.consultorio_id}`,
@@ -88,7 +78,7 @@ export default function DetalleCita({ route, navigation }) {
         }
       } catch (error) {
         console.error(error);
-        alert("❌ No se pudo cargar la cita");
+        alert(" No se pudo cargar la cita");
       } finally {
         setLoading(false);
       }
@@ -121,15 +111,15 @@ export default function DetalleCita({ route, navigation }) {
               const data = await response.json();
 
               if (response.ok) {
-                Alert.alert("✅ Paciente eliminado correctamente");
+                Alert.alert("Paciente eliminado correctamente");
                 navigation.navigate("ListarCitas"); 
               } else {
                 console.error("Error del servidor:", data);
-                Alert.alert("❌ Error", data.message || "No se pudo eliminar la cita");
+                Alert.alert("Error", data.message || "No se pudo eliminar la cita");
               }
             } catch (error) {
               console.error("Error eliminando cita:", error);
-              Alert.alert("❌ Error de conexión con el servidor");
+              Alert.alert("Error de conexión con el servidor");
             }
           },
         },
@@ -149,7 +139,7 @@ export default function DetalleCita({ route, navigation }) {
   if (!cita) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: "red" }}>⚠️ No se encontró la información de la cita</Text>
+        <Text style={{ color: "red" }}>No se encontró la información de la cita</Text>
       </View>
     );
   }
@@ -208,7 +198,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff0f5", // Fondo pastel rosado
+    backgroundColor: "#fff0f5", 
   },
   title: {
     fontSize: 22,

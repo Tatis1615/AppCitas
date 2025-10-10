@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -39,10 +33,8 @@ export default function Login({ navigation }) {
         if (data.user) {
           await AsyncStorage.setItem("paciente_email", email);
           await AsyncStorage.setItem("user_role", data.user.role);
-          await AsyncStorage.setItem("paciente_id", data.user.id.toString()); // 👈 GUARDA el ID del paciente
+          await AsyncStorage.setItem("paciente_id", data.user.id.toString()); 
         }
-
-
         alert(data.message);
 
         if (data.user && data.user.role === "admin") {
@@ -79,13 +71,12 @@ export default function Login({ navigation }) {
         onChangeText={setEmail}
       />
 
-      {/* botón de mostrar/ocultar contraseña */}
       <View style={styles.passwordContainer}>
         <TextInput
           style={[styles.input, { flex: 1, marginVertical: 0 }]}
           placeholder="Contraseña"
           placeholderTextColor="#cc6699"
-          secureTextEntry={!showPassword} // 👈 aquí cambia
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
         />

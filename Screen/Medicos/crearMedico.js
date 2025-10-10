@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import ModalSelector from "react-native-modal-selector";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
 export default function CrearMedico({ navigation }) {
-  const [especialidades, setEspecialidades] = useState([]); // lista de especialidades
+  const [especialidades, setEspecialidades] = useState([]);
   const [especialidad_id, setEspecialidadId] = useState(""); 
   const [nombre_m, setNombre] = useState("");
   const [apellido_m, setApellido] = useState("");
@@ -30,10 +30,10 @@ export default function CrearMedico({ navigation }) {
         if (!response.ok) throw new Error("No se pudieron cargar las especialidades");
 
         const data = await response.json();
-        setEspecialidades(data); // guardamos la lista
+        setEspecialidades(data);
       } catch (error) {
         console.error("Error cargando especialidades:", error);
-        alert("❌ Error al cargar especialidades");
+        alert("Error al cargar especialidades");
       }
     };
 
@@ -42,7 +42,7 @@ export default function CrearMedico({ navigation }) {
 
   const handleCrear = async () => {
     if (!especialidad_id || !nombre_m || !apellido_m || !edad || !telefono ||!email) {
-      alert("⚠️ Por favor completa todos los campos");
+      alert(" Por favor completa todos los campos");
       return;
     }
 
@@ -62,15 +62,15 @@ export default function CrearMedico({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("✅ Médico creado correctamente");
+        alert("Médico creado correctamente");
         navigation.navigate("ListarMedicos");
       } else {
         console.log("Errores:", data);
-        alert("❌ " + (data.message || "No se pudo crear el médico"));
+        alert((data.message || "No se pudo crear el médico"));
       }
     } catch (error) {
       console.error("Error en crear médico:", error);
-      alert("⚠️ Hubo un problema al conectar con el servidor");
+      alert(" Hubo un problema al conectar con el servidor");
     }
   };
 
@@ -121,12 +121,12 @@ export default function CrearMedico({ navigation }) {
         onChangeText={setEmail}
       />
 
-      {/* Botón Crear */}
+
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
         <Text style={styles.buttonText}>Crear Médico</Text>
       </TouchableOpacity>
 
-      {/* Botón Volver */}
+
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
         onPress={() => navigation.goBack()}
@@ -136,59 +136,57 @@ export default function CrearMedico({ navigation }) {
     </KeyboardAwareScrollView>
   );
 
-function SelectInput({ data, value, onChange, placeholder }) {
-  return (
-    <ModalSelector
-      data={data}
-      initValue={placeholder}
-      onChange={(option) => onChange(option.key)}
-      cancelText="Cancelar"
+  function SelectInput({ data, value, onChange, placeholder }) {
+    return (
+      <ModalSelector
+        data={data}
+        initValue={placeholder}
+        onChange={(option) => onChange(option.key)}
+        cancelText="Cancelar"
 
-      optionContainerStyle={{
-        backgroundColor: "#fff0f5", // pastel rosa muy claro
-        borderRadius: 20,
-        padding: 10,
-      }}
-      optionTextStyle={{
-        fontSize: 16,
-        color: "#444",
-        paddingVertical: 10,
-      }}
-      cancelStyle={{
-        backgroundColor: "#ffe4e1", // rosa pastel
-        borderRadius: 20,
-        marginTop: 10,
-      }}
-      cancelTextStyle={{
-        fontSize: 16,
-        color: "#cc3366",
-        fontWeight: "bold",
-      }}
-      overlayStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-      initValueTextStyle={{ color: "#888", fontSize: 16 }}
-      selectTextStyle={{ color: "#000", fontSize: 16 }}
-      style={{ width: "100%", marginVertical: 8 }}
-    >
-      <View style={styles.inputSelect}>
-        <Text style={{ color: value ? "#000" : "#888", fontSize: 16 }}>
-          {value
-            ? data.find((d) => d.key === value)?.label
-            : placeholder}
-        </Text>
-      </View>
-    </ModalSelector>
-    
-  );
+        optionContainerStyle={{
+          backgroundColor: "#fff0f5", 
+          borderRadius: 20,
+          padding: 10,
+        }}
+        optionTextStyle={{
+          fontSize: 16,
+          color: "#444",
+          paddingVertical: 10,
+        }}
+        cancelStyle={{
+          backgroundColor: "#ffe4e1", 
+          borderRadius: 20,
+          marginTop: 10,
+        }}
+        cancelTextStyle={{
+          fontSize: 16,
+          color: "#cc3366",
+          fontWeight: "bold",
+        }}
+        overlayStyle={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+        initValueTextStyle={{ color: "#888", fontSize: 16 }}
+        selectTextStyle={{ color: "#000", fontSize: 16 }}
+        style={{ width: "100%", marginVertical: 8 }}
+      >
+        <View style={styles.inputSelect}>
+          <Text style={{ color: value ? "#000" : "#888", fontSize: 16 }}>
+            {value
+              ? data.find((d) => d.key === value)?.label
+              : placeholder}
+          </Text>
+        </View>
+      </ModalSelector>
+      
+    );
+  }
 }
-
-}
-
 
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff0f5", // Fondo pastel suave
+    backgroundColor: "#fff0f5", 
     justifyContent: "center",
     alignItems: "center",
     padding: 35,
@@ -242,8 +240,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3, // sombra en Android
+    elevation: 3, 
   },
-  
 });
-

@@ -1,23 +1,38 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Para usar íconos bonitos
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  Image,
+  Animated,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Import para url 
+import API_BASE_URL from "../../Src/Config";
+
+const { width } = Dimensions.get("window");
 
 export default function InicioMedico({ navigation }) {
+  const [userName, setUserName] = useState("");
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-
-const [userName, setUserName] = useState("");
+  const images = [
+    "https://img.freepik.com/foto-gratis/cientificos-tiro-medio-posando-juntos_23-2148969982.jpg",
+    "https://www.shutterstock.com/image-photo/hospital-hallway-multiethnic-medical-staff-600nw-2557673759.jpg",
+    "https://www.shutterstock.com/image-photo/doctor-healthcare-medicine-patient-talking-600nw-2191880035.jpg",
+  ];
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = await AsyncStorage.getItem("token"); 
-
-        if (!token) {
-          console.log("No hay token guardado");
-          return;
-        }
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
 
         const response = await fetch(`${API_BASE_URL}/me`, {
           headers: {
@@ -27,11 +42,8 @@ const [userName, setUserName] = useState("");
         });
 
         const data = await response.json();
-
         if (response.ok) {
-          setUserName(data.user?.name || "Usuario");
-        } else {
-          console.log("Error en la respuesta:", data);
+          setUserName(data.user?.name || "Doctor/a");
         }
       } catch (error) {
         console.error("Error obteniendo usuario:", error);
@@ -39,115 +51,221 @@ const [userName, setUserName] = useState("");
     };
 
     fetchUser();
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
-    
+  // Carrusel con desplazamiento automático
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % images.length;
+      scrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
+      setCurrentIndex(nextIndex);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [currentIndex]);
 
+  const renderCarousel = () => (
+    <View style={styles.carouselWrapper}>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        {images.map((uri, i) => (
+          <View key={i} style={{ width, justifyContent: "center", alignItems: "center" }}>
+            <Image source={{ uri }} style={styles.carouselImage} resizeMode="cover" />
+          </View>
+        ))}
+      </ScrollView>
 
-
+      <View style={styles.dots}>
+        {images.map((_, i) => {
+          const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+          const opacity = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.3, 1, 0.3],
+            extrapolate: "clamp",
+          });
+          return <Animated.View key={i} style={[styles.dot, { opacity }]} />;
+        })}
+      </View>
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🎀 Bienvenido al sistema de Citas 🎀 {userName}</Text>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+      {renderCarousel()}
 
-      <View style={styles.grid}>
-        
+      <Animated.View style={[styles.headerCard, { opacity: fadeAnim }]}>
+        <Ionicons name="medkit-outline" size={30} color="#cc3366" />
+        <Text style={styles.welcomeText}>¡Hola, Dr(a). {userName}! 🩺</Text>
+        <Text style={styles.subText}>
+          Gestiona tus pacientes, consultorios y especialidades fácilmente desde esta plataforma.
+        </Text>
+      </Animated.View>
 
-        {/* Recuadro 2 */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Pacientes", { screen: "ListarPacientesMedico" })}
-        >
-          <Ionicons name="person-add-outline" size={40} color="#e38ea8" />
-          <Text style={styles.cardTitle}>Pacientes</Text>
-          <Text style={styles.cardDesc}>Ver pacientes</Text>
-        </TouchableOpacity>
+      <Animated.View style={[styles.dashboardSection, { opacity: fadeAnim }]}>
+        <Text style={styles.sectionTitle}>Panel de gestión</Text>
 
+        <View style={styles.grid}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("Pacientes", { screen: "ListarPacientesMedico" })
+            }
+          >
+            <Ionicons name="people-outline" size={42} color="#e38ea8" />
+            <Text style={styles.cardTitle}>Pacientes</Text>
+            <Text style={styles.cardDesc}>Revisa y gestiona tus pacientes</Text>
+          </TouchableOpacity>
 
-        {/* Recuadro 4 */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Consultorios", { screen: "ListarConsultoriosMedico" })}
-        >
-          <Ionicons name="business-outline" size={40} color="#e38ea8" />
-          <Text style={styles.cardTitle}>Consultorios</Text>
-          <Text style={styles.cardDesc}>Gestión de consultorios</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("Consultorios", { screen: "ListarConsultoriosMedico" })
+            }
+          >
+            <Ionicons name="business-outline" size={42} color="#e38ea8" />
+            <Text style={styles.cardTitle}>Consultorios</Text>
+            <Text style={styles.cardDesc}>Administra tus espacios de atención</Text>
+          </TouchableOpacity>
 
-        {/* Recuadro 4 */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Especialidades", { screen: "ListarEspecialidadesMedico" })}
-        >
-          <Ionicons name="business-outline" size={40} color="#e38ea8" />
-          <Text style={styles.cardTitle}>Especialidades</Text>
-          <Text style={styles.cardDesc}>Gestión de especialidades</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("Especialidades", { screen: "ListarEspecialidadesMedico" })
+            }
+          >
+            <Ionicons name="medal-outline" size={42} color="#e38ea8" />
+            <Text style={styles.cardTitle}>Especialidades</Text>
+            <Text style={styles.cardDesc}>Gestiona tus áreas de especialidad</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+
+      <View style={styles.footerCard}>
+        <Text style={styles.footerText}>
+          “La salud del paciente es nuestra prioridad. Gracias por tu dedicación profesional.” 💗
+        </Text>
       </View>
-
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff0f5", // Fondo rosado suave
-    padding: 20,
+  container: { flex: 1, backgroundColor: "#fef5f8ff" },
+
+  carouselWrapper: { height: 240, marginVertical: 10 },
+  carouselImage: {
+    width: width - 40,
+    height: 220,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
-  title: {
-    fontSize: 22,
+  dots: {
+    position: "absolute",
+    bottom: 8,
+    flexDirection: "row",
+    alignSelf: "center",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 8,
+    backgroundColor: "#cc3366",
+    marginHorizontal: 5,
+  },
+
+  headerCard: {
+    backgroundColor: "#fee5efff",
+    marginHorizontal: 18,
+    marginVertical: 12,
+    borderRadius: 20,
+    padding: 18,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  welcomeText: {
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 35,
-    color: "#e38ea8",
+    color: "#cc3366",
+    marginTop: 6,
+  },
+  subText: {
     textAlign: "center",
+    color: "#555",
+    fontSize: 14,
+    marginTop: 4,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#cc3366",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+
+  dashboardSection: {
+    marginHorizontal: 16,
+    marginTop: 10,
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    gap: 12,
+    gap: 14,
   },
   card: {
-    width: "40%", // 2 tarjetas por fila
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 25,
+    width: "42%",
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 20,
     alignItems: "center",
-    marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "#eee",
+    elevation: 4,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginTop: 10,
-    color: "#e38ea8",
+    marginTop: 6,
+    color: "#333",
   },
   cardDesc: {
     fontSize: 13,
-    color: "#666",
+    color: "#777",
     textAlign: "center",
-    marginTop: 5,
+    marginTop: 4,
   },
 
-  logoutButton: {
-    backgroundColor: "#cc3366",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 20,
-    marginBottom: 30,
-    marginTop: 35,
-    width: 150,
+  footerCard: {
+    backgroundColor: "#fee5efff",
+    margin: 20,
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "center",
   },
-  logoutText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+  footerText: {
+    color: "#cc3366",
+    fontStyle: "italic",
+    textAlign: "center",
+    fontSize: 14,
   },
 });

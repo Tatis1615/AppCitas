@@ -1,8 +1,6 @@
-// ConsultoriosStack.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// Importa tus pantallas reales
 import ListarConsultorios from "../../Screen/Consultorios/listarConsultorio";
 import CrearConsultorio from "../../Screen/Consultorios/crearConsultorio";
 import DetalleConsultorio from "../../Screen/Consultorios/detalleConsultorio";

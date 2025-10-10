@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  ScrollView,
-  TextInput,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import API_BASE_URL from "../../Src/Config";
@@ -16,16 +7,13 @@ import { Image } from "react-native";
 
 export default function Perfil({ navigation }) {
   const [user, setUser] = useState(null);
-  const [paciente, setPaciente] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
 
-  // Campos de usuario
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Campos del paciente
   const [pacienteData, setPacienteData] = useState({
     nombre: "",
     apellido: "",
@@ -35,7 +23,6 @@ export default function Perfil({ navigation }) {
     fecha_nacimiento: "",
   });
 
-  // Campos del médico
   const [medicoData, setMedicoData] = useState({
     nombre_m: "",
     apellido_m: "",
@@ -51,7 +38,6 @@ export default function Perfil({ navigation }) {
         const token = await AsyncStorage.getItem("token");
         if (!token) return;
 
-        // Obtener usuario logueado
         const resUser = await fetch(`${API_BASE_URL}/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -65,7 +51,6 @@ export default function Perfil({ navigation }) {
           setName(userData.user.name);
           setEmail(userData.user.email);
 
-          // Si es paciente, cargar sus datos
           if (userData.user.role === "paciente") {
             const resPaciente = await fetch(
               `${API_BASE_URL}/pacientePorEmail/${encodeURIComponent(userData.user.email)}`,
@@ -92,7 +77,6 @@ export default function Perfil({ navigation }) {
             }
           }
 
-          // Si es médico, cargar sus datos
           if (userData.user.role === "medico") {
             const resMedico = await fetch(
               `${API_BASE_URL}/medicoPorEmail/${encodeURIComponent(userData.user.email)}`,
@@ -120,7 +104,7 @@ export default function Perfil({ navigation }) {
           }
         }
       } catch (error) {
-        console.error("❌ Error cargando perfil:", error);
+        console.error("Error cargando perfil:", error);
       } finally {
         setLoading(false);
       }
@@ -138,7 +122,6 @@ export default function Perfil({ navigation }) {
         return;
       }
 
-      // ✅ Actualizar tabla users
       await fetch(`${API_BASE_URL}/editarUsuario/${user.id}`, {
         method: "PUT",
         headers: {
@@ -148,7 +131,6 @@ export default function Perfil({ navigation }) {
         body: JSON.stringify({ name, email, password }),
       });
 
-      // ✅ Si es PACIENTE, actualizar por email
       if (user.role === "paciente") {
         await fetch(
           `${API_BASE_URL}/actualizarPacienteEmail/${encodeURIComponent(user.email)}`,
@@ -163,7 +145,6 @@ export default function Perfil({ navigation }) {
         );
       }
 
-      // ✅ Si es MÉDICO, actualizar por email
       if (user.role === "medico") {
         await fetch(
           `${API_BASE_URL}/actualizarMedicoEmail/${encodeURIComponent(user.email)}`,
@@ -178,14 +159,13 @@ export default function Perfil({ navigation }) {
         );
       }
 
-      Alert.alert("✅ Perfil actualizado con éxito");
+      Alert.alert("Perfil actualizado con éxito");
       setEditing(false);
     } catch (error) {
       console.error("Error al guardar:", error);
-      Alert.alert("❌ No se pudo guardar la información");
+      Alert.alert("No se pudo guardar la información");
     }
   };
-
 
   const handleLogout = async () => {
     try {
@@ -229,7 +209,7 @@ export default function Perfil({ navigation }) {
             <Text style={styles.role}>{user.role}</Text>
           </View>
 
-          {/* ===================== DATOS USUARIO ===================== */}
+
           <Text style={styles.sectionTitle}>Datos de Usuario</Text>
 
           <Text style={styles.label}>Nombre de usuario</Text>
@@ -258,7 +238,7 @@ export default function Perfil({ navigation }) {
             onChangeText={setPassword}
           />
 
-          {/* ===================== DATOS PACIENTE ===================== */}
+
           {user.role === "paciente" && (
             <>
               <Text style={styles.sectionTitle}>Datos del Paciente</Text>
@@ -286,7 +266,7 @@ export default function Perfil({ navigation }) {
             </>
           )}
 
-          {/* ===================== DATOS MÉDICO ===================== */}
+
           {user.role === "medico" && (
             <>
               <Text style={styles.sectionTitle}>Datos del Médico</Text>
@@ -314,12 +294,21 @@ export default function Perfil({ navigation }) {
             </>
           )}
 
-          {/* ===================== BOTONES ===================== */}
           {editing ? (
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Ionicons name="save-outline" size={20} color="#fff" />
-              <Text style={styles.logoutText}>Guardar cambios</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
+              <TouchableOpacity style={[styles.saveButton, { flex: 1, marginRight: 8 }]} onPress={handleSave}>
+                <Ionicons name="save-outline" size={20} color="#fff" />
+                <Text style={styles.logoutText}>Guardar cambios</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.cancelButton, { flex: 1, marginLeft: 8 }]}
+                onPress={() => setEditing(false)}
+              >
+                <Ionicons name="close-circle-outline" size={20} color="#fff" />
+                <Text style={styles.logoutText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <TouchableOpacity
               style={styles.editButton}
@@ -329,6 +318,7 @@ export default function Perfil({ navigation }) {
               <Text style={styles.logoutText}>Editar perfil</Text>
             </TouchableOpacity>
           )}
+
 
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color="#fff" />
@@ -416,5 +406,14 @@ const styles = StyleSheet.create({
     borderColor: "#f7b2c4",
     marginBottom: 12,
     backgroundColor: "#ffeef6",
+  },
+  cancelButton: {
+    backgroundColor: "#cc3366",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 20,
+    marginTop: 10,
   },
 });

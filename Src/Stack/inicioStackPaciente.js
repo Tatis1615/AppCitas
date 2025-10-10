@@ -1,10 +1,8 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// Pantalla de menú principal
 import InicioPaciente from "../../Screen/Inicio/inicioPaciente"; 
 
-// Importa los stacks de cada módulo
 import MedicosStack from "./medicosStackPaciente";
 import EspecialidadesStack from "./especialidadesStackPaciente"
 import CitasStackPaciente from "./citasStackPaciente";

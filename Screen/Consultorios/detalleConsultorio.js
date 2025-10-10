@@ -27,7 +27,7 @@ export default function DetalleConsultorio({ route, navigation }) {
         setConsultorio(data);
       } catch (error) {
         console.error(error);
-        alert("❌ No se pudo cargar el consultorio");
+        alert("No se pudo cargar el consultorio");
       } finally {
         setLoading(false);
       }
@@ -60,15 +60,15 @@ export default function DetalleConsultorio({ route, navigation }) {
               const data = await response.json();
 
               if (response.ok) {
-                Alert.alert("✅ Consultorio eliminado correctamente");
-                navigation.navigate("ListarConsultorios"); // 🔹 Redirige a la lista
+                Alert.alert("Consultorio eliminado correctamente");
+                navigation.navigate("ListarConsultorios");
               } else {
                 console.error("Error del servidor:", data);
-                Alert.alert("❌ Error", data.message || "No se pudo eliminar el consultorio");
+                Alert.alert("Error", data.message || "No se pudo eliminar el consultorio");
               }
             } catch (error) {
               console.error("Error eliminando consultorio:", error);
-              Alert.alert("❌ Error de conexión con el servidor");
+              Alert.alert("Error de conexión con el servidor");
             }
           },
         },
@@ -88,7 +88,7 @@ export default function DetalleConsultorio({ route, navigation }) {
   if (!consultorio) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: "red" }}>⚠️ No se encontró información del consultorio</Text>
+        <Text style={{ color: "red" }}>No se encontró información del consultorio</Text>
       </View>
     );
   }
@@ -105,13 +105,13 @@ export default function DetalleConsultorio({ route, navigation }) {
         <Text style={styles.value}>{consultorio.ubicacion}</Text>
       </View>
 
-      {/* Botón Editar */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("EditarConsultorio", { consultorio })}
       >
         <Text style={styles.buttonText}>Editar</Text>
       </TouchableOpacity>
+
 
       <TouchableOpacity
         style={[styles.button, styles.deleteButton]}
@@ -120,7 +120,7 @@ export default function DetalleConsultorio({ route, navigation }) {
         <Text style={[styles.buttonText, { color: "white" }]}>Eliminar</Text>
       </TouchableOpacity>
 
-      {/* Botón Volver */}
+
       <TouchableOpacity
         style={[styles.button, styles.cancelButton]}
         onPress={() => navigation.goBack()}

@@ -1,8 +1,6 @@
-// EspecialidadesStack.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// Importa tus pantallas reales
 import ListarEspecialidades from "../../Screen/Especialidades/listarEspecialidad";
 import CrearEspecialidad from "../../Screen/Especialidades/crearEspecialidad";
 import DetalleEspecialidad from "../../Screen/Especialidades/detalleEspecialidad";

@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Platform,
-  TextInput,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Platform, TextInput, Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ModalSelector from "react-native-modal-selector";
@@ -30,7 +21,6 @@ export default function CrearCita({ navigation }) {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [tempDate, setTempDate] = useState(new Date());
 
-  // ✅ Función genérica para cargar cualquier tipo de dato
   const fetchData = async (endpoint, setter, errorMsg) => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -44,19 +34,17 @@ export default function CrearCita({ navigation }) {
       const data = await response.json();
       setter(data);
     } catch (error) {
-      console.error(`❌ ${errorMsg}:`, error);
+      console.error(`${errorMsg}:`, error);
       Alert.alert("Error", errorMsg);
     }
   };
 
-  // ✅ Cargar todos los datos con un solo useEffect
   useEffect(() => {
     fetchData("listarPacientes", setPacientes, "Error al cargar pacientes");
     fetchData("listarMedicos", setMedicos, "Error al cargar médicos");
     fetchData("listarConsultorios", setConsultorios, "Error al cargar consultorios");
   }, []);
 
-  // ✅ Crear cita
   const handleCrear = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -64,7 +52,7 @@ export default function CrearCita({ navigation }) {
       const finalPacienteId = Number(pacienteId || pacienteStorage);
 
       if (!finalPacienteId || !medicoId || !consultorioId || !fechaHora || !motivo) {
-        Alert.alert("⚠️ Por favor completa todos los campos antes de continuar.");
+        Alert.alert("Por favor completa todos los campos antes de continuar.");
         return;
       }
 
@@ -88,19 +76,18 @@ export default function CrearCita({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("✅ Cita creada correctamente");
+        Alert.alert("Cita creada correctamente");
         navigation.navigate("ListarCitas");
       } else {
         console.error("Errores del servidor:", data);
-        Alert.alert("❌ Error", data.message || "No se pudo crear la cita");
+        Alert.alert("Error", data.message || "No se pudo crear la cita");
       }
     } catch (error) {
       console.error("Error en crear cita:", error);
-      Alert.alert("❌ Hubo un problema al conectar con el servidor");
+      Alert.alert("Hubo un problema al conectar con el servidor");
     }
   };
 
-  // ✅ Selección de fecha y hora
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -115,12 +102,11 @@ export default function CrearCita({ navigation }) {
       const finalDate = new Date(tempDate);
       finalDate.setHours(selectedTime.getHours());
       finalDate.setMinutes(selectedTime.getMinutes());
-      const fechaFormateada = finalDate.toISOString().slice(0, 16).replace("T", " ");
+      const fechaFormateada = finalDate.toISOString().slice(0, 10) + " " + finalDate.toTimeString().slice(0, 5);
       setFechaHora(fechaFormateada);
     }
   };
 
-  // ✅ Componente de selector (limpio)
   const SelectInput = ({ data, value, onChange, placeholder }) => (
     <ModalSelector
       data={data}
@@ -195,7 +181,6 @@ export default function CrearCita({ navigation }) {
           onChange={onChangeTime}
         />
       )}
-
       <TextInput
         style={styles.input}
         placeholder="Motivo de la cita"

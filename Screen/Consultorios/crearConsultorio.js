@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -30,14 +30,14 @@ export default function CrearConsultorio({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Éxito", "✅ Consultorio creada correctamente");
+        alert("Éxito", "Consultorio creada correctamente");
         navigation.navigate("ListarConsultorios");
       } else {
         console.log("Errores:", data);
-        alert("Error", data.message || "No se pudo crear la cita");
+        alert("Error", data.message || "No se pudo crear el consultorio");
       }
     } catch (error) {
-      console.error("Error en crear cita:", error);
+      console.error("Error en crear consultrorio:", error);
       alert("Error", "Hubo un problema al conectar con el servidor");
     }
   };
@@ -80,7 +80,7 @@ export default function CrearConsultorio({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff0f5", // Fondo pastel suave
+    backgroundColor: "#fff0f5", 
     justifyContent: "center",
     alignItems: "center",
     padding: 35,

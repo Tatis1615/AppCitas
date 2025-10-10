@@ -1,23 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
 export default function DetalleCitaMedico({ route, navigation }) {
-  // Seguridad: soporta route.params.id o route.params.cita
   const params = route.params || {};
   const idFromParams = params.id ?? params.cita?.id ?? params.cita_id ?? null;
-  const [citaId] = useState(Number(idFromParams)); // inmuta el id
+  const [citaId] = useState(Number(idFromParams));
 
   const { cita } = params;
-  const [medico, setMedico] = useState(null);
+  const [paciente, setPaciente] = useState(null);
   const [consultorio, setConsultorioNumero] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,21 +18,19 @@ export default function DetalleCitaMedico({ route, navigation }) {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        // Traer médico
-        if (cita?.medico_id) {
-          const res = await fetch(`${API_BASE_URL}/medicos/${cita.medico_id}`, {
+        if (cita?.paciente_id) {
+          const res = await fetch(`${API_BASE_URL}/pacientes/${cita.paciente_id}`, {
             headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
           });
-          if (res.ok) setMedico(await res.json());
+          if (res.ok) setPaciente(await res.json());
         }
 
-        // Traer consultorio
         if (cita.consultorios) {
           setConsultorioNumero(cita.consultorios.numero ?? "No disponible");
         }
 
       } catch (error) {
-        console.error("❌ Error cargando detalles:", error);
+        console.error("Error cargando detalles:", error);
       } finally {
         setLoading(false);
       }
@@ -50,7 +40,6 @@ export default function DetalleCitaMedico({ route, navigation }) {
   }, [cita]);
 
   const eliminarCitaPaciente = async () => {
-    // Validación temprana
     if (!citaId || isNaN(citaId)) {
       Alert.alert("Error", "ID de cita inválido. No se puede eliminar.");
       console.log("ID inválido recibido en DetalleCitaPaciente:", route.params);
@@ -69,7 +58,7 @@ export default function DetalleCitaMedico({ route, navigation }) {
             try {
               const token = await AsyncStorage.getItem("token");
               const url = `${API_BASE_URL}/eliminarCita/${citaId}`;
-              console.log("📤 DELETE ->", url);
+              console.log("DELETE ->", url);
 
               const response = await fetch(url, {
                 method: "DELETE",
@@ -80,13 +69,11 @@ export default function DetalleCitaMedico({ route, navigation }) {
                 },
               });
 
-              // parseo tolerante (evita JSON parse error si backend devuelve vacío)
               let serverBody = {};
               try {
                 const text = await response.text();
                 serverBody = text ? JSON.parse(text) : {};
               } catch (err) {
-                // si no es JSON, lo guardamos como texto para debug
                 console.warn("Respuesta no JSON al eliminar cita:", err);
                 serverBody = { message: await response.text() };
               }
@@ -94,17 +81,15 @@ export default function DetalleCitaMedico({ route, navigation }) {
               console.log("Respuesta eliminarCita:", response.status, serverBody);
 
               if (response.ok) {
-                Alert.alert("✅ Cita eliminada correctamente");
-                // Actualiza o vuelve a la lista
+                Alert.alert("Cita eliminada correctamente");
                 navigation.navigate("ListarCitasPaciente");
               } else {
-                // Muestra mensaje del servidor si existe, sino mensaje por defecto
                 const msg = serverBody?.message || "No se pudo eliminar la cita";
-                Alert.alert("❌ Error", msg);
+                Alert.alert("Error", msg);
               }
             } catch (error) {
               console.error("Error eliminando cita:", error);
-              Alert.alert("❌ Error de conexión con el servidor");
+              Alert.alert("Error de conexión con el servidor");
             }
           },
         },
@@ -126,9 +111,9 @@ export default function DetalleCitaMedico({ route, navigation }) {
       <Text style={styles.title}>Detalles de la Cita</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Médico:</Text>
+        <Text style={styles.label}>Paciente:</Text>
         <Text style={styles.value}>
-          {medico ? `${medico.nombre_m} ${medico.apellido_m}` : "No disponible"}
+          {paciente ? `${paciente.nombre} ${paciente.apellido}` : "No disponible"}
         </Text>
 
         <Text style={styles.label}>Consultorio:</Text>
@@ -144,7 +129,6 @@ export default function DetalleCitaMedico({ route, navigation }) {
         <Text style={styles.value}>{cita?.motivo ?? "No disponible"}</Text>
       </View>
 
-    {/* Botón Editar */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("EditarCitaMedico", { cita })}

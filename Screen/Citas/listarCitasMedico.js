@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -87,7 +79,7 @@ export default function ListarCitasMedico({ navigation }) {
           }
         }
       } catch (error) {
-        console.error("error obteniendo citas del médico:", error);
+        console.error("Error obteniendo citas del médico:", error);
         Alert.alert("Error", "Ocurrió un problema al cargar tus citas.");
         setIsMedico(false);
       } finally {
@@ -111,7 +103,6 @@ export default function ListarCitasMedico({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Lista de mis citas médicas</Text>
 
-      {/* Botones arriba */}
       <View style={styles.topButtons}>
         <TouchableOpacity
           style={[
@@ -192,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 10,
     fontWeight: "bold",
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   warningText: {

@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -30,15 +23,15 @@ export default function EditarEspecialidad({ route, navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-       alert("✅ Consultorio actualizado con éxito");
+       alert("Especialidad actualizado con éxito");
         navigation.navigate("ListarEspecialidades");
       } else {
-        console.log("⚠️ Backend respondió con error:", data);
-        alert("❌ Error al actualizar el consultorio");
+        console.log("Backend respondió con error:", data);
+        alert("Error al actualizar la especialidad");
       }
     } catch (error) {
-      console.error("⚡ Error de red:", error);
-      alert("⚠️ Error de conexión con el servidor");
+      console.error("Error de red:", error);
+      alert("Error de conexión con el servidor");
     }
   };
 
@@ -61,12 +54,10 @@ export default function EditarEspecialidad({ route, navigation }) {
         />
       </View>
 
-      {/* Botón Guardar */}
       <TouchableOpacity style={styles.button} onPress={handleGuardar}>
         <Text style={styles.buttonText}>Guardar</Text>
       </TouchableOpacity>
 
-      {/* Botón Cancelar */}
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
         onPress={() => navigation.goBack()}
@@ -80,7 +71,7 @@ export default function EditarEspecialidad({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff0f5", // fondo pastel suave
+    backgroundColor: "#fff0f5",
     padding: 20,
   },
   title: {
@@ -91,7 +82,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#ffe6f0",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 15,
     marginBottom: 20,
@@ -109,14 +100,15 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ffb6c1",
-    borderRadius: 10,
+    borderColor: "#e38ea8",
+    borderRadius: 15,
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 16,
+    marginBottom: 12,
   },
   button: {
-    backgroundColor: "pink",
+    backgroundColor: "#f7b2c4",
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",

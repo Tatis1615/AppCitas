@@ -59,7 +59,6 @@ export default function ListarMedicos({ navigation }) {
             style={styles.card}
             onPress={() => navigation.navigate("DetalleMedico", { id: item.id })}
           >
-            {/* Si tu médico tiene foto */}
             <Image source={{ uri: "https://i.pinimg.com/1200x/1f/76/ac/1f76acfbd41313190d4ea2feb388d1f6.jpg" }} style={styles.avatar} />
             <View style={styles.info}>
               <Text style={styles.cardTitle}>{item.nombre_m}</Text>

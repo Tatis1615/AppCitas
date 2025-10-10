@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Platform,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Alert } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,7 +29,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
   const [tempDate, setTempDate] = useState(new Date());
   const [pacienteEmail, setPacienteEmail] = useState("");
 
-  // 🔹 Función genérica para hacer fetch con token
   const fetchWithToken = async (endpoint) => {
     const token = await AsyncStorage.getItem("token");
     const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
@@ -51,7 +40,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
     return res.ok ? res.json() : [];
   };
 
-  // 🔹 Cargar todos los datos al mismo tiempo
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,7 +56,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
         });
       } catch (error) {
         console.error("Error cargando datos:", error);
-        Alert.alert("❌ Error al cargar datos");
+        Alert.alert("Error al cargar datos");
       } finally {
         setLoading(false);
       }
@@ -76,7 +64,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
     fetchData();
   }, []);
 
-  // Obtener email del paciente
   useEffect(() => {
     const getPacienteEmail = async () => {
       try {
@@ -105,13 +92,13 @@ export default function CrearCitaPaciente({ route, navigation }) {
     getPacienteEmail();
   }, [paciente_id]);
 
-  // 🔹 Crear cita
+
   const handleCrear = async () => {
     const { idMedico, idConsultorio, motivo, fecha_hora } = form;
 
-    if (!pacienteEmail) return Alert.alert("⚠️ Error", "No se encontró el email del paciente.");
+    if (!pacienteEmail) return Alert.alert("Error", "No se encontró el email del paciente.");
     if (!idMedico || !idConsultorio || !motivo || !fecha_hora)
-      return Alert.alert("⚠️ Campos incompletos", "Por favor completa todos los campos.");
+      return Alert.alert("Campos incompletos", "Por favor completa todos los campos.");
 
     try {
       const token = await AsyncStorage.getItem("token");
@@ -133,18 +120,17 @@ export default function CrearCitaPaciente({ route, navigation }) {
 
       const body = await response.json();
       if (response.ok) {
-        Alert.alert("✅ Cita creada correctamente");
+        Alert.alert("Cita creada correctamente");
         navigation.navigate("ListarCitasPaciente");
       } else {
-        Alert.alert("❌ Error", body.message || "No se pudo crear la cita");
+        Alert.alert("Error", body.message || "No se pudo crear la cita");
       }
     } catch (e) {
       console.error(e);
-      Alert.alert("❌ Error de conexión con el servidor");
+      Alert.alert("Error de conexión con el servidor");
     }
   };
 
-  // Manejo de fecha y hora
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -172,7 +158,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
       </View>
     );
 
-  // 🔹 UI
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={styles.container}
@@ -181,8 +166,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
     >
       <Text style={styles.title}>Agendar Nueva Cita</Text>
 
-      {/* Médico */}
-      <Text style={styles.label}>Selecciona un médico</Text>
+
       <Dropdown
         style={styles.dropdown}
         containerStyle={styles.dropdownContainer}
@@ -199,8 +183,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
         onChange={(item) => setForm({ ...form, idMedico: item.value })}
       />
 
-      {/* Consultorio */}
-      <Text style={styles.label}>Selecciona consultorio</Text>
       <Dropdown
         style={styles.dropdown}
         containerStyle={styles.dropdownContainer}
@@ -215,7 +197,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
         onChange={(item) => setForm({ ...form, idConsultorio: item.value })}
       />
 
-      {/* Fecha y hora */}
       <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
         <Text style={{ color: form.fecha_hora ? "#000" : "#888" }}>
           {form.fecha_hora || "Selecciona fecha y hora"}
@@ -240,7 +221,6 @@ export default function CrearCitaPaciente({ route, navigation }) {
         />
       )}
 
-      {/* Motivo */}
       <TextInput
         style={styles.input}
         placeholder="Motivo de la cita"
@@ -248,7 +228,7 @@ export default function CrearCitaPaciente({ route, navigation }) {
         onChangeText={(motivo) => setForm({ ...form, motivo })}
       />
 
-      {/* Botones */}
+
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
         <Text style={styles.buttonText}>Crear Cita</Text>
       </TouchableOpacity>
@@ -272,7 +252,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#cc3366",
+    color: "#e38ea8",
     textAlign: "center",
   },
   input: {

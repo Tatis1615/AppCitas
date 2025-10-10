@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
@@ -29,7 +29,7 @@ export default function CrearEspecialidad({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Éxito", "✅ Especialidad creada correctamente");
+        alert("Éxito", "Especialidad creada correctamente");
         navigation.navigate("ListarEspecialidades");
       } else {
         console.log("Errores:", data);
@@ -55,12 +55,11 @@ export default function CrearEspecialidad({ navigation }) {
             value={nombre_e}
             onChangeText={setNombre}
         />
-      {/* Botón Crear */}
+      
       <TouchableOpacity style={styles.button} onPress={handleCrear}>
         <Text style={styles.buttonText}>Crear Paciente</Text>
       </TouchableOpacity>
       
-      {/* Botón Volver */}
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
         onPress={() => navigation.goBack()}
@@ -74,7 +73,7 @@ export default function CrearEspecialidad({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff0f5", // Fondo pastel suave
+    backgroundColor: "#fff0f5", 
     justifyContent: "center",
     alignItems: "center",
     padding: 35,

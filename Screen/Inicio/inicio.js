@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Para usar íconos bonitos
+import { Ionicons } from "@expo/vector-icons"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Import para url 
+import API_BASE_URL from "../../Src/Config"; 
 
 export default function Inicio({ navigation }) {
-
 
 const [userName, setUserName] = useState("");
 
@@ -41,19 +40,13 @@ const [userName, setUserName] = useState("");
     fetchUser();
   }, []);
 
-    
-
-
-
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎀 Bienvenido al sistema de Citas 🎀 {userName}</Text>
+      <Text style={styles.title}>🎀 Bienvenido al sistema de Citas {userName} 🎀</Text>
 
       <View style={styles.grid}>
         
 
-        {/* Recuadro 2 */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => navigation.navigate("Pacientes", { screen: "ListarPacientes" })}
@@ -63,7 +56,6 @@ const [userName, setUserName] = useState("");
           <Text style={styles.cardDesc}>Ver pacientes</Text>
         </TouchableOpacity>
 
-        {/* Recuadro 3 */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => navigation.navigate("Medicos", { screen: "ListarMedicos" })}
@@ -73,7 +65,6 @@ const [userName, setUserName] = useState("");
           <Text style={styles.cardDesc}>Ver listado de médicos</Text>
         </TouchableOpacity>
 
-        {/* Recuadro 4 */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => navigation.navigate("Consultorios", { screen: "ListarConsultorios" })}
@@ -83,7 +74,6 @@ const [userName, setUserName] = useState("");
           <Text style={styles.cardDesc}>Gestión de consultorios</Text>
         </TouchableOpacity>
 
-        {/* Recuadro 4 */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => navigation.navigate("Especialidades", { screen: "ListarEspecialidades" })}
@@ -93,7 +83,6 @@ const [userName, setUserName] = useState("");
           <Text style={styles.cardDesc}>Gestión de especialidades</Text>
         </TouchableOpacity>
       </View>
-
     </View>
   );
 }
@@ -101,7 +90,7 @@ const [userName, setUserName] = useState("");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff0f5", // Fondo rosado suave
+    backgroundColor: "#fff0f5",
     padding: 20,
   },
   title: {
@@ -118,7 +107,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    width: "40%", // 2 tarjetas por fila
+    width: "40%",
     backgroundColor: "white",
     padding: 20,
     borderRadius: 25,

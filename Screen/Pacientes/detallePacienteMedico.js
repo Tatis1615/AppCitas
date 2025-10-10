@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "../../Src/Config";
 
@@ -34,7 +27,7 @@ export default function DetallePacienteMedico({ route, navigation }) {
         setPaciente(data);
       } catch (error) {
         console.error(error);
-        Alert.alert("❌ No se pudo cargar el paciente");
+        Alert.alert(" No se pudo cargar el paciente");
       } finally {
         setLoading(false);
       }
@@ -46,7 +39,7 @@ export default function DetallePacienteMedico({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#cc3366" />
+        <ActivityIndicator size="large" color="#e38ea8" />
         <Text>Cargando paciente...</Text>
       </View>
     );
@@ -55,7 +48,7 @@ export default function DetallePacienteMedico({ route, navigation }) {
   if (!paciente) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: "red" }}>⚠️ No se encontró información</Text>
+        <Text style={{ color: "red" }}> No se encontró información</Text>
       </View>
     );
   }
@@ -87,8 +80,6 @@ export default function DetallePacienteMedico({ route, navigation }) {
         <Text style={styles.value}>{paciente.direccion}</Text>
       </View>
 
-
-      {/* 🔹 Botón Volver */}
       <TouchableOpacity
         style={[styles.button, styles.cancelButton]}
         onPress={() => navigation.goBack()}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "../../Src/Config"; // Importamos la URL base de la API
+import API_BASE_URL from "../../Src/Config"; 
 
 export default function ListarConsultorios({ navigation }) {
   const [consultorios, setConsultorios] = useState([]);
@@ -29,7 +29,7 @@ export default function ListarConsultorios({ navigation }) {
           console.log("Error al obtener consultorio:", data);
         }
       } catch (error) {
-        console.error("Error en fetchCitas:", error);
+        console.error("Error en fetch:", error);
       } finally {
         setLoading(false);
       }
@@ -70,7 +70,6 @@ export default function ListarConsultorios({ navigation }) {
         }
       />
 
-      {/* Botón Crear Consultorio */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("CrearConsultorio")}
