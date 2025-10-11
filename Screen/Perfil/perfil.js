@@ -1,235 +1,134 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, TextInput } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, TextInput, Image } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import API_BASE_URL from "../../Src/Config";
-import { Image } from "react-native";
 
 export default function Perfil({ navigation }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  
-
-  const [pacienteData, setPacienteData] = useState({
-    nombre: "",
-    apellido: "",
-    documento: "",
-    telefono: "",
-    direccion: "",
-    fecha_nacimiento: "",
-  });
-
-  const [medicoData, setMedicoData] = useState({
-    nombre_m: "",
-    apellido_m: "",
-    edad: "",
-    telefono: "",
-    email: "",
-    especialidad_id: "",
-  });
   const [especialidades, setEspecialidades] = useState([]);
- 
+
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [pacienteData, setPacienteData] = useState({});
+  const [medicoData, setMedicoData] = useState({});
+
+  const apiRequest = async (endpoint, method = "GET", body = null) => {
+    const token = await AsyncStorage.getItem("token");
+    const options = {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    };
+    if (body) options.body = JSON.stringify(body);
+
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, options);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error en la solicitud");
+    return data;
+  };
 
   useEffect(() => {
-
-    const fetchEspecialidades = async () => {
+    const init = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const res = await fetch(`${API_BASE_URL}/listarEspecialidades`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
+        const especialidadesRes = await apiRequest("/listarEspecialidades");
+        const lista =
+          Array.isArray(especialidadesRes)
+            ? especialidadesRes
+            : especialidadesRes.data || [];
+        setEspecialidades(lista);
+
+        const userRes = await apiRequest("/me");
+        const currentUser = userRes.user;
+        setUser(currentUser);
+        setUserInfo({
+          name: currentUser.name,
+          email: currentUser.email,
+          password: "",
         });
-        const data = await res.json();
 
-        console.log("Especialidades recibidas:", data);
-
-        if (res.ok) {
-          if (Array.isArray(data)) {
-            setEspecialidades(data);
-          } else if (data.data && Array.isArray(data.data)) {
-            setEspecialidades(data.data);
-          } else {
-            console.log("Formato inesperado de respuesta:", data);
-          }
-        } else {
-          console.log("Error obteniendo especialidades:", data);
+        if (currentUser.role === "paciente") {
+          const p = await apiRequest(
+            `/pacientePorEmail/${encodeURIComponent(currentUser.email)}`
+          );
+          if (p.success) setPacienteData(p.data);
         }
-      } catch (error) {
-        console.error("Error cargando especialidades:", error);
-      }
-    };
 
-
-    fetchEspecialidades();
-
-    const fetchData = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-
-        const resUser = await fetch(`${API_BASE_URL}/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        });
-        const userData = await resUser.json();
-
-        if (resUser.ok) {
-          setUser(userData.user);
-          setName(userData.user.name);
-          setEmail(userData.user.email);
-
-          if (userData.user.role === "paciente") {
-            const resPaciente = await fetch(
-              `${API_BASE_URL}/pacientePorEmail/${encodeURIComponent(userData.user.email)}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  Accept: "application/json",
-                },
-              }
-            );
-
-            const pacienteInfo = await resPaciente.json();
-
-            if (resPaciente.ok && pacienteInfo.success) {
-              const datos = pacienteInfo.data;
-              setPacienteData({
-                nombre: datos.nombre || "",
-                apellido: datos.apellido || "",
-                documento: datos.documento || "",
-                telefono: datos.telefono || "",
-                direccion: datos.direccion || "",
-                fecha_nacimiento: datos.fecha_nacimiento || "",
-              });
-            }
-          }
-
-          if (userData.user.role === "medico") {
-            const resMedico = await fetch(
-              `${API_BASE_URL}/medicoPorEmail/${encodeURIComponent(userData.user.email)}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  Accept: "application/json",
-                },
-              }
-            );
-
-            const medicoInfo = await resMedico.json();
-
-            if (resMedico.ok && medicoInfo.success) {
-              const datos = medicoInfo.data;
-              setMedicoData({
-                nombre_m: datos.nombre_m || "",
-                apellido_m: datos.apellido_m || "",
-                edad: datos.edad || "",
-                telefono: datos.telefono || "",
-                email: datos.email || "",
-                especialidad_id: datos.especialidad_id?.toString() || "",
-              });
-            }
-          }
+        if (currentUser.role === "medico") {
+          const m = await apiRequest(
+            `/medicoPorEmail/${encodeURIComponent(currentUser.email)}`
+          );
+          if (m.success)
+            setMedicoData({
+              ...m.data,
+              especialidad_id: m.data.especialidad_id?.toString() || "",
+            });
         }
-      } catch (error) {
-        console.error("Error cargando perfil:", error);
+      } catch (err) {
+        console.error("Error cargando datos:", err);
+        Alert.alert("Error", "No se pudieron cargar tus datos");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    init();
   }, []);
 
   const handleSave = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      if (!user) return Alert.alert("Error", "Usuario no cargado");
 
-      if (!user) {
-        Alert.alert("Error", "No hay información del usuario cargada");
-        return;
-      }
+      await apiRequest(`/editarUsuario/${user.id}`, "PUT", userInfo);
 
-      await fetch(`${API_BASE_URL}/editarUsuario/${user.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      if (user.role === "paciente") {
-        await fetch(
-          `${API_BASE_URL}/actualizarPacienteEmail/${encodeURIComponent(user.email)}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(pacienteData),
-          }
+      if (user.role === "paciente")
+        await apiRequest(
+          `/actualizarPacienteEmail/${encodeURIComponent(user.email)}`,
+          "PUT",
+          pacienteData
         );
-      }
 
-      if (user.role === "medico") {
-        await fetch(
-          `${API_BASE_URL}/actualizarMedicoEmail/${encodeURIComponent(user.email)}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(medicoData),
-          }
+      if (user.role === "medico")
+        await apiRequest(
+          `/actualizarMedicoEmail/${encodeURIComponent(user.email)}`,
+          "PUT",
+          medicoData
         );
-      }
 
-      Alert.alert("Perfil actualizado con éxito");
+      Alert.alert("Éxito", "Perfil actualizado con éxito");
       setEditing(false);
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      Alert.alert("No se pudo guardar la información");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "No se pudo guardar la información");
     }
   };
 
   const handleLogout = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      await fetch(`${API_BASE_URL}/logout`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
+      await apiRequest("/logout", "POST");
       await AsyncStorage.removeItem("token");
       navigation.replace("Login");
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "No se pudo cerrar sesión");
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#f7b2c4" />
         <Text style={styles.loadingText}>Cargando perfil...</Text>
       </View>
     );
-  }
 
   return (
     <ScrollView style={styles.container}>
@@ -242,28 +141,26 @@ export default function Perfil({ navigation }) {
               }}
               style={styles.profileImage}
             />
-            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.name}>{userInfo.name}</Text>
             <Text style={styles.role}>{user.role}</Text>
           </View>
 
-
           <Text style={styles.sectionTitle}>Datos de Usuario</Text>
 
-          <Text style={styles.label}>Nombre de usuario</Text>
-          <TextInput
-            editable={editing}
-            style={[styles.input, !editing && styles.readOnly]}
-            value={name}
-            onChangeText={setName}
-          />
-
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            editable={editing}
-            style={[styles.input, !editing && styles.readOnly]}
-            value={email}
-            onChangeText={setEmail}
-          />
+          {[
+            { label: "Nombre de usuario", key: "name" },
+            { label: "Correo electrónico", key: "email" },
+          ].map((f) => (
+            <View key={f.key}>
+              <Text style={styles.label}>{f.label}</Text>
+              <TextInput
+                editable={editing}
+                style={[styles.input, !editing && styles.readOnly]}
+                value={userInfo[f.key]}
+                onChangeText={(v) => setUserInfo({ ...userInfo, [f.key]: v })}
+              />
+            </View>
+          ))}
 
           <Text style={styles.label}>Nueva contraseña</Text>
           <TextInput
@@ -271,31 +168,29 @@ export default function Perfil({ navigation }) {
             secureTextEntry
             placeholder="•••••••"
             style={[styles.input, !editing && styles.readOnly]}
-            value={password}
-            onChangeText={setPassword}
+            value={userInfo.password}
+            onChangeText={(v) => setUserInfo({ ...userInfo, password: v })}
           />
-
 
           {user.role === "paciente" && (
             <>
               <Text style={styles.sectionTitle}>Datos del Paciente</Text>
-
-              {[
-                { label: "Nombre", key: "nombre" },
-                { label: "Apellido", key: "apellido" },
-                { label: "Documento", key: "documento" },
-                { label: "Teléfono", key: "telefono" },
-                { label: "Dirección", key: "direccion" },
-                { label: "Fecha de nacimiento", key: "fecha_nacimiento" },
-              ].map((field) => (
-                <View key={field.key}>
-                  <Text style={styles.label}>{field.label}</Text>
+              {Object.entries({
+                nombre: "Nombre",
+                apellido: "Apellido",
+                documento: "Documento",
+                telefono: "Teléfono",
+                direccion: "Dirección",
+                fecha_nacimiento: "Fecha de nacimiento",
+              }).map(([key, label]) => (
+                <View key={key}>
+                  <Text style={styles.label}>{label}</Text>
                   <TextInput
                     editable={editing}
                     style={[styles.input, !editing && styles.readOnly]}
-                    value={pacienteData[field.key]}
+                    value={pacienteData[key] || ""}
                     onChangeText={(v) =>
-                      setPacienteData({ ...pacienteData, [field.key]: v })
+                      setPacienteData({ ...pacienteData, [key]: v })
                     }
                   />
                 </View>
@@ -303,25 +198,26 @@ export default function Perfil({ navigation }) {
             </>
           )}
 
-
           {user.role === "medico" && (
             <>
               <Text style={styles.sectionTitle}>Datos del Médico</Text>
 
-              {[
-                { label: "Nombre", key: "nombre_m" },
-                { label: "Apellido", key: "apellido_m" },
-                { label: "Edad", key: "edad" },
-                { label: "Teléfono", key: "telefono" },
-                { label: "Correo", key: "email" },
-              ].map((field) => (
-                <View key={field.key}>
-                  <Text style={styles.label}>{field.label}</Text>
+              {Object.entries({
+                nombre_m: "Nombre",
+                apellido_m: "Apellido",
+                edad: "Edad",
+                telefono: "Teléfono",
+                email: "Correo",
+              }).map(([key, label]) => (
+                <View key={key}>
+                  <Text style={styles.label}>{label}</Text>
                   <TextInput
                     editable={editing}
                     style={[styles.input, !editing && styles.readOnly]}
-                    value={medicoData[field.key]}
-                    onChangeText={(v) => setMedicoData({ ...medicoData, [field.key]: v })}
+                    value={medicoData[key] || ""}
+                    onChangeText={(v) =>
+                      setMedicoData({ ...medicoData, [key]: v })
+                    }
                   />
                 </View>
               ))}
@@ -336,7 +232,10 @@ export default function Perfil({ navigation }) {
                     }
                     style={styles.picker}
                   >
-                    <Picker.Item label="Seleccionar especialidad..." value="" />
+                    <Picker.Item
+                      label="Seleccionar especialidad..."
+                      value=""
+                    />
                     {especialidades.map((esp) => (
                       <Picker.Item
                         key={esp.id}
@@ -360,12 +259,14 @@ export default function Perfil({ navigation }) {
             </>
           )}
 
-
           {editing ? (
-            <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
-              <TouchableOpacity style={[styles.saveButton, { flex: 1, marginRight: 8 }]} onPress={handleSave}>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.saveButton, { flex: 1, marginRight: 8 }]}
+                onPress={handleSave}
+              >
                 <Ionicons name="save-outline" size={20} color="#fff" />
-                <Text style={styles.logoutText}>Guardar cambios</Text>
+                <Text style={styles.logoutText}>Guardar</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -385,7 +286,6 @@ export default function Perfil({ navigation }) {
               <Text style={styles.logoutText}>Editar perfil</Text>
             </TouchableOpacity>
           )}
-
 
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color="#fff" />
@@ -449,6 +349,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 10,
   },
+  cancelButton: {
+    backgroundColor: "#cc3366",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  buttonRow: { flexDirection: "row", justifyContent: "space-between" },
   logoutButton: {
     flexDirection: "row",
     justifyContent: "center",
@@ -474,15 +384,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: "#ffeef6",
   },
-  cancelButton: {
-    backgroundColor: "#cc3366",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 20,
-    marginTop: 10,
-  },
   pickerContainer: {
     backgroundColor: "#fff6fa",
     borderWidth: 1,
@@ -490,9 +391,5 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 10,
   },
-  picker: {
-    height: 50,
-    color: "#444",
-  },
-
+  picker: { height: 50, color: "#444" },
 });
