@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, TextInput } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import API_BASE_URL from "../../Src/Config";
@@ -13,6 +14,7 @@ export default function Perfil({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
 
   const [pacienteData, setPacienteData] = useState({
     nombre: "",
@@ -31,8 +33,43 @@ export default function Perfil({ navigation }) {
     email: "",
     especialidad_id: "",
   });
+  const [especialidades, setEspecialidades] = useState([]);
+ 
 
   useEffect(() => {
+
+    const fetchEspecialidades = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const res = await fetch(`${API_BASE_URL}/listarEspecialidades`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+        const data = await res.json();
+
+        console.log("Especialidades recibidas:", data);
+
+        if (res.ok) {
+          if (Array.isArray(data)) {
+            setEspecialidades(data);
+          } else if (data.data && Array.isArray(data.data)) {
+            setEspecialidades(data.data);
+          } else {
+            console.log("Formato inesperado de respuesta:", data);
+          }
+        } else {
+          console.log("Error obteniendo especialidades:", data);
+        }
+      } catch (error) {
+        console.error("Error cargando especialidades:", error);
+      }
+    };
+
+
+    fetchEspecialidades();
+
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -277,7 +314,6 @@ export default function Perfil({ navigation }) {
                 { label: "Edad", key: "edad" },
                 { label: "Teléfono", key: "telefono" },
                 { label: "Correo", key: "email" },
-                { label: "Especialidad ID", key: "especialidad_id" },
               ].map((field) => (
                 <View key={field.key}>
                   <Text style={styles.label}>{field.label}</Text>
@@ -285,14 +321,45 @@ export default function Perfil({ navigation }) {
                     editable={editing}
                     style={[styles.input, !editing && styles.readOnly]}
                     value={medicoData[field.key]}
-                    onChangeText={(v) =>
-                      setMedicoData({ ...medicoData, [field.key]: v })
-                    }
+                    onChangeText={(v) => setMedicoData({ ...medicoData, [field.key]: v })}
                   />
                 </View>
               ))}
+
+              <Text style={styles.label}>Especialidad</Text>
+              {editing ? (
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={medicoData.especialidad_id}
+                    onValueChange={(value) =>
+                      setMedicoData({ ...medicoData, especialidad_id: value })
+                    }
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Seleccionar especialidad..." value="" />
+                    {especialidades.map((esp) => (
+                      <Picker.Item
+                        key={esp.id}
+                        label={esp.nombre_e}
+                        value={esp.id.toString()}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              ) : (
+                <TextInput
+                  editable={false}
+                  style={[styles.input, styles.readOnly]}
+                  value={
+                    especialidades.find(
+                      (e) => e.id.toString() === medicoData.especialidad_id
+                    )?.nombre_e || ""
+                  }
+                />
+              )}
             </>
           )}
+
 
           {editing ? (
             <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
@@ -416,4 +483,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 10,
   },
+  pickerContainer: {
+    backgroundColor: "#fff6fa",
+    borderWidth: 1,
+    borderColor: "#fbd6e3",
+    borderRadius: 15,
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    color: "#444",
+  },
+
 });

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform, ActivityIndicator } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -11,6 +11,7 @@ export default function Registro({ navigation }) {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
+  // Paciente
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [documento, setDocumento] = useState("");
@@ -20,12 +21,36 @@ export default function Registro({ navigation }) {
   const [direccion, setDireccion] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Médico
   const [nombreM, setNombreM] = useState("");
   const [apellidoM, setApellidoM] = useState("");
   const [edad, setEdad] = useState("");
   const [telefonoM, setTelefonoM] = useState("");
   const [emailMedico, setEmailMedico] = useState("");
   const [especialidadId, setEspecialidadId] = useState("");
+  const [especialidades, setEspecialidades] = useState([]);
+  const [loadingEspecialidades, setLoadingEspecialidades] = useState(false);
+
+  // 🔹 Obtener especialidades del backend
+  useEffect(() => {
+    const fetchEspecialidades = async () => {
+      setLoadingEspecialidades(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/listarEspecialidades`);
+        const data = await response.json();
+        if (response.ok) {
+          setEspecialidades(data);
+        } else {
+          console.log("Error al listar especialidades:", data);
+        }
+      } catch (error) {
+        console.log("Error de conexión al obtener especialidades:", error);
+      } finally {
+        setLoadingEspecialidades(false);
+      }
+    };
+    fetchEspecialidades();
+  }, []);
 
   const handleRegister = async () => {
     if (!name || !email || !password || !role) {
@@ -55,11 +80,8 @@ export default function Registro({ navigation }) {
       const token = data.token;
       const userId = data.user?.id;
 
-
       if (role === "paciente") {
-        const filledFields = [nombre, apellido, documento, telefono, emailPaciente, direccion, fecha_nacimiento]
-          .filter((v) => v.trim() !== "");
-
+        const filledFields = [nombre, apellido, documento, telefono, emailPaciente, direccion, fecha_nacimiento].filter((v) => v.trim() !== "");
         if (filledFields.length > 0) {
           try {
             const responsePaciente = await fetch(`${API_BASE_URL}/crearPaciente`, {
@@ -80,12 +102,8 @@ export default function Registro({ navigation }) {
                 fecha_nacimiento,
               }),
             });
-
             const dataPaciente = await responsePaciente.json();
-
-            if (!responsePaciente.ok) {
-              console.log("Paciente ya existente o error:", dataPaciente);
-            }
+            if (!responsePaciente.ok) console.log("Paciente ya existente o error:", dataPaciente);
           } catch (err) {
             console.log("Error al crear paciente:", err);
           }
@@ -93,9 +111,7 @@ export default function Registro({ navigation }) {
       }
 
       if (role === "medico") {
-        const filledFields = [nombreM, apellidoM, edad, telefonoM, emailMedico, especialidadId]
-          .filter((v) => v.trim() !== "");
-
+        const filledFields = [nombreM, apellidoM, edad, telefonoM, emailMedico, especialidadId].filter((v) => v.trim() !== "");
         if (filledFields.length > 0) {
           try {
             const responseMedico = await fetch(`${API_BASE_URL}/crearMedico`, {
@@ -115,20 +131,16 @@ export default function Registro({ navigation }) {
                 especialidad_id: especialidadId,
               }),
             });
-
             const dataMedico = await responseMedico.json();
-
-            if (!responseMedico.ok) {
-              console.log("Médico ya existente o error:", dataMedico);
-            }
+            if (!responseMedico.ok) console.log("Médico ya existente o error:", dataMedico);
           } catch (err) {
             console.log("Error al crear médico:", err);
           }
         }
       }
+
       Alert.alert("Éxito", "Usuario registrado correctamente 💖");
       navigation.navigate("Login");
-
     } catch (error) {
       console.error("Error en el registro:", error);
       Alert.alert("Error", "Hubo un problema con la conexión al servidor");
@@ -147,28 +159,10 @@ export default function Registro({ navigation }) {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>✨ Registro ✨</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre de usuario"
-        placeholderTextColor="#cc6699"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Correo"
-        placeholderTextColor="#cc6699"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor="#cc6699"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      {/* Campos básicos */}
+      <TextInput style={styles.input} placeholder="Nombre de usuario" placeholderTextColor="#cc6699" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="Correo" placeholderTextColor="#cc6699" value={email} onChangeText={setEmail} />
+      <TextInput style={styles.input} placeholder="Contraseña" placeholderTextColor="#cc6699" secureTextEntry value={password} onChangeText={setPassword} />
 
       <Dropdown
         style={styles.dropdown}
@@ -186,10 +180,10 @@ export default function Registro({ navigation }) {
         placeholderStyle={styles.placeholderStyle}
       />
 
+      {/* 🔹 Datos del paciente */}
       {role === "paciente" && (
         <View style={styles.extraContainer}>
           <Text style={styles.subtitle}>🩺 Datos del Paciente</Text>
-
           <TextInput style={styles.input} placeholder="Nombre" value={nombre} onChangeText={setNombre} />
           <TextInput style={styles.input} placeholder="Apellido" value={apellido} onChangeText={setApellido} />
           <TextInput style={styles.input} placeholder="Documento" value={documento} onChangeText={setDocumento} />
@@ -213,6 +207,7 @@ export default function Registro({ navigation }) {
         </View>
       )}
 
+      {/* 🔹 Datos del médico */}
       {role === "medico" && (
         <View style={styles.extraContainer}>
           <Text style={styles.subtitle}>🩺 Datos del Médico</Text>
@@ -222,7 +217,25 @@ export default function Registro({ navigation }) {
           <TextInput style={styles.input} placeholder="Edad" value={edad} onChangeText={setEdad} keyboardType="numeric" />
           <TextInput style={styles.input} placeholder="Teléfono" value={telefonoM} onChangeText={setTelefonoM} />
           <TextInput style={styles.input} placeholder="Email" value={emailMedico} onChangeText={setEmailMedico} />
-          <TextInput style={styles.input} placeholder="Especialidad ID" value={especialidadId} onChangeText={setEspecialidadId} />
+
+          {loadingEspecialidades ? (
+            <ActivityIndicator size="small" color="#cc3366" />
+          ) : (
+            <Dropdown
+              style={styles.dropdown}
+              containerStyle={styles.dropdownContainer}
+              data={especialidades.map((e) => ({
+                label: e.nombre_e,
+                value: e.id.toString(),
+              }))}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecciona una especialidad"
+              value={especialidadId}
+              onChange={(item) => setEspecialidadId(item.value)}
+              placeholderStyle={styles.placeholderStyle}
+            />
+          )}
         </View>
       )}
 
